@@ -184,7 +184,8 @@ def simulate_all(panel: Panel, exp: Experiment, layout: Layout, only: list[str] 
                 "backend": cfg["backend"], "builtin": cfg["builtin"], "badread": cfg["badread"],
                 "min_length": int(cfg["min_length"]), "oversample": float(cfg["oversample"]),
             })
-    workers = workers or max(1, min(len(jobs), (os.cpu_count() or 2)))
+    # Badread holds a whole region FASTA in memory per worker; cap the default to stay within ~32 GB RAM
+    workers = workers or max(1, min(len(jobs), (os.cpu_count() or 2), 4))
     results = []
     if workers == 1:
         for j in jobs:

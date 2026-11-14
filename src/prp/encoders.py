@@ -122,6 +122,9 @@ class PlantCADEncoder(nn.Module):
         self.lut = torch.tensor(plain, dtype=torch.long)
         cfg = self.model.config
         if rc_combine == "auto":
+            if not hasattr(cfg, "rcps"):
+                print("[encoder] WARNING: model config has no 'rcps' flag; not combining strands. "
+                      "Set encoders.<name>.rc_combine: true if the model is reverse-complement equivariant.")
             self.rc = bool(getattr(cfg, "rcps", False))
         else:
             self.rc = rc_combine in ("true", True)
