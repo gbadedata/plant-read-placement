@@ -1,0 +1,65 @@
+# Species panel for the benchmark.
+#
+# Three genera (Solanum, Prunus, Citrus) have two panel species each and Fabaceae has two genera, so the
+# genus- and family-level contrastive terms have real positives to learn from; elsewhere the panel is
+# one species per genus to cover more of the angiosperm tree.
+#
+# role:
+#   panel          known species: reference prototypes + contrastive training labels (train regions only)
+#   val_relative   unseen species whose GENUS is in the panel      -> truth "relative"  (validation)
+#   val_new        unseen species whose genus is NOT in the panel  -> truth "new"       (validation)
+#   test_relative  as val_relative, held out for the frozen test run
+#   test_new       as val_new, held out for the frozen test run
+#
+# pretrain: is the species in PlantCaduceus's pre-training set? That set is 8 Poaceae + 8 Brassicales
+# genomes (Zhai et al., PNAS 2025, Methods). Every species below is outside both clades, so "false" is
+# confirmed by taxonomy. Held-out species must never be "true" (enforced by `prp check-panel --strict`).
+#
+# `prp resolve` picks the best NCBI assembly for each name (reference genome > RefSeq > level > contig
+# N50) and pins it in work/genomes/lock.json. If a name resolves to nothing, use the alternate in `note`.
+name: plant-read-placement-v1
+species:
+  # ---------------------------------------------------------------- panel (known)
+  - {name: Solanum lycopersicum, genus: Solanum, family: Solanaceae, order: Solanales, role: panel, pretrain: false}
+  - {name: Solanum melongena, genus: Solanum, family: Solanaceae, order: Solanales, role: panel, pretrain: false,
+     note: "second Solanum so the genus-level contrastive term has positives"}
+  - {name: Coffea canephora, genus: Coffea, family: Rubiaceae, order: Gentianales, role: panel, pretrain: false}
+  - {name: Catharanthus roseus, genus: Catharanthus, family: Apocynaceae, order: Gentianales, role: panel, pretrain: false,
+     note: "Madagascar periwinkle; source of the vinca alkaloids"}
+  - {name: Medicago truncatula, genus: Medicago, family: Fabaceae, order: Fabales, role: panel, pretrain: false}
+  - {name: Phaseolus vulgaris, genus: Phaseolus, family: Fabaceae, order: Fabales, role: panel, pretrain: false}
+  - {name: Prunus persica, genus: Prunus, family: Rosaceae, order: Rosales, role: panel, pretrain: false}
+  - {name: Prunus avium, genus: Prunus, family: Rosaceae, order: Rosales, role: panel, pretrain: false}
+  - {name: Cucumis sativus, genus: Cucumis, family: Cucurbitaceae, order: Cucurbitales, role: panel, pretrain: false}
+  - {name: Citrus x clementina, genus: Citrus, family: Rutaceae, order: Sapindales, role: panel, pretrain: false,
+     note: "NCBI organism name includes the hybrid 'x'"}
+  - {name: Citrus maxima, genus: Citrus, family: Rutaceae, order: Sapindales, role: panel, pretrain: false,
+     note: "pummelo; alternate: Citrus reticulata"}
+  - {name: Populus trichocarpa, genus: Populus, family: Salicaceae, order: Malpighiales, role: panel, pretrain: false}
+  - {name: Vitis vinifera, genus: Vitis, family: Vitaceae, order: Vitales, role: panel, pretrain: false}
+
+  # ---------------------------------------------------------------- validation (thresholds + model selection)
+  - {name: Solanum pennellii, genus: Solanum, family: Solanaceae, order: Solanales, role: val_relative, pretrain: false}
+  - {name: Prunus mume, genus: Prunus, family: Rosaceae, order: Rosales, role: val_relative, pretrain: false}
+  - {name: Citrus sinensis, genus: Citrus, family: Rutaceae, order: Sapindales, role: val_relative, pretrain: false}
+  - {name: Theobroma cacao, genus: Theobroma, family: Malvaceae, order: Malvales, role: val_new, pretrain: false,
+     note: "family absent from panel"}
+  - {name: Malus domestica, genus: Malus, family: Rosaceae, order: Rosales, role: val_new, pretrain: false,
+     note: "new genus in a panel family (hard case)"}
+  - {name: Ricinus communis, genus: Ricinus, family: Euphorbiaceae, order: Malpighiales, role: val_new, pretrain: false,
+     note: "family absent, order present"}
+
+  # ---------------------------------------------------------------- test (scored once, after freezing)
+  - {name: Solanum tuberosum, genus: Solanum, family: Solanaceae, order: Solanales, role: test_relative, pretrain: false}
+  - {name: Coffea eugenioides, genus: Coffea, family: Rubiaceae, order: Gentianales, role: test_relative, pretrain: false}
+  - {name: Cucumis melo, genus: Cucumis, family: Cucurbitaceae, order: Cucurbitales, role: test_relative, pretrain: false}
+  - {name: Phaseolus lunatus, genus: Phaseolus, family: Fabaceae, order: Fabales, role: test_relative, pretrain: false,
+     note: "alternate if unavailable: Phaseolus acutifolius"}
+  - {name: Beta vulgaris, genus: Beta, family: Amaranthaceae, order: Caryophyllales, role: test_new, pretrain: false}
+  - {name: Sesamum indicum, genus: Sesamum, family: Pedaliaceae, order: Lamiales, role: test_new, pretrain: false}
+  - {name: Aquilegia coerulea, genus: Aquilegia, family: Ranunculaceae, order: Ranunculales, role: test_new, pretrain: false,
+     note: "Ranunculales, the benzylisoquinoline-alkaloid order; alternate: Nelumbo nucifera (Proteales)"}
+  - {name: Citrullus lanatus, genus: Citrullus, family: Cucurbitaceae, order: Cucurbitales, role: test_new, pretrain: false,
+     note: "new genus in a panel family (hard case)"}
+  - {name: Fragaria vesca, genus: Fragaria, family: Rosaceae, order: Rosales, role: test_new, pretrain: false,
+     note: "new genus in a panel family (hard case)"}

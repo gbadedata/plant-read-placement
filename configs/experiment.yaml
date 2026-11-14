@@ -1,0 +1,76 @@
+# Experiment settings. Anything not set here falls back to prp/config.py DEFAULT_EXPERIMENT.
+# This file is hashed into the preregistration lock: change it before `prp freeze`, not after.
+seed: 20261114
+workdir: work
+
+regions:
+  block_size: 1000000        # 1 Mb blocks; each panel-species block goes to exactly one split
+  min_contig: 50000          # ignore scaffolds shorter than this
+  fractions: {train: 0.8, val: 0.1, test: 0.1}
+
+simulate:
+  backend: badread           # `builtin` is the fast fallback; results must then say so
+  reads: {train: 3000, val: 1000, test: 1000}   # per species per split (held-out species: their split only)
+  min_length: 1000
+  oversample: 1.3            # Badread cannot target an exact read count; simulate extra and subsample
+  badread:
+    executable: badread
+    # Noisy, R9-era-like reads: mean identity 92% (max 98%, sd 3%), mean length 8 kb. Badread keeps its
+    # default junk/random reads, chimeras and adapters, which is realistic; junk/random reads are
+    # excluded from training labels but kept in evaluation. If your Badread lacks the 2023 models,
+    # use nanopore2020.
+    args: ["--error_model", "nanopore2023", "--qscore_model", "nanopore2023",
+           "--identity", "92,98,3", "--length", "8000,6000"]
+    mean_length: 8000
+
+windows: {size: 512, max_per_read: 8}   # PlantCaduceus context is 512 bp
+
+encoders:
+  kmer: {type: kmer, k: 5}
+  plantcad:
+    type: plantcad
+    model: kuleshov-group/PlantCaduceus_l20   # 20M parameters; try _l32 (225M) if time allows
+    batch_size: 64
+    amp: bf16                                  # use fp16 on GPUs without bf16 (e.g. T4), none for fp32
+    device: cuda
+  # PlantCAD2 accepts up to 8,192 bp, which suits long reads. Check the exact Hugging Face model id on
+  # https://github.com/plantcad/plantcad before enabling, and raise windows.size if you use it.
+  # plantcad2:
+  #   {type: plantcad, model: <PlantCAD2-Small HF id>, batch_size: 8, amp: bf16, device: cuda}
+
+head:
+  hidden: 512
+  out_dim: 128
+  dropout: 0.1
+  temperature: 0.1
+  lambda_genus: 0.5          # hierarchical SupCon: pull congeners together
+  lambda_family: 0.25
+  species_per_batch: 0       # 0 = all panel species in every batch
+  reads_per_species: 16
+  steps: 3000
+  lr: 1.0e-3
+  weight_decay: 1.0e-4
+  eval_every: 250
+  device: auto
+
+finetune:
+  encoder: plantcad
+  # Unfreeze the top blocks of the backbone. Run `prp list-params --encoder plantcad` on the GPU machine
+  # and adjust these patterns to the printed names before fine-tuning (the run stops if nothing matches).
+  trainable_regex: ["layers\\.(1[6-9])\\.", "norm_f"]
+  windows_per_read: 4
+  species_per_batch: 0
+  reads_per_species: 4
+  steps: 2000
+  lr_backbone: 2.0e-5
+  lr_head: 1.0e-3
+  eval_every: 250
+
+evaluation:
+  specimen_sizes: [1, 10, 50]       # reads per specimen
+  max_specimens_per_species: 200
+  bootstrap: 2000
+  identity_bins: [0.0, 0.88, 0.92, 0.96, 1.0]
+  length_bins: [0, 2000, 5000, 10000, 1000000000]
+
+minimap2: {preset: map-ont, threads: 16}

@@ -1,0 +1,10 @@
+cff-version: 1.2.0
+message: "If you use this benchmark, please cite it as below."
+title: "plant-read-placement: placing plant specimens from noisy Nanopore reads with a plant DNA language model"
+authors:
+  - family-names: Odimayo
+    given-names: Oluwagbade
+version: 0.1.0
+date-released: 2026-11-14
+license: MIT
+repository-code: "https://github.com/gbadedata/plant-read-placement"
