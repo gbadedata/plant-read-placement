@@ -114,6 +114,20 @@ Changes made on validation before the lock, kept here so they are visible next t
   step), backbone learning rate 1e-4, everything else unchanged. Added logging of skipped fp16 updates,
   encoder gradient norm and how far the weights move. Whatever attempt 2 gives is the `plantcad_ft2_head`
   result; there is no attempt 3 before the test.
+- **Diagnosis of attempt 1, written 18 Nov 2026 about 23:00, before attempt 2 finished.** The loss splits
+  into species, genus and family terms; all three sat at 3.93 from step 250 to step 3000. ln(51) = 3.93 is
+  exactly what this loss gives when every pair in a 52-read batch has the same similarity, i.e. the
+  head inside the fine-tune collapsed: it stopped separating anything, rather than learning slowly. The
+  total, 1.75 x ln(51) = 6.88, is also where attempt 2 sits at steps 250 and 500 (6.92, 6.87), so attempt 2
+  is predicted to end the same way. Two likely causes, neither tested yet: (a) little signal per step
+  (1 or 3 windows of 512 bp per read, 52 reads); (b) a design flaw: that head standardises its inputs with
+  statistics from only the first 128 training windows (about 18 reads of one species), while PlantCaduceus
+  read embeddings are extremely anisotropic (median cosine 0.998 between two random reads; 99% of the
+  variance in 5 of 384 directions), so species information sits in tiny directions that those statistics
+  mis-scale. The frozen-model head, standardised over all training reads, did not collapse. Correction to
+  attempt 1's entry: the adapted encoder's outputs did change (mostly a constant offset, plus a per-read
+  change about one sixth of the typical distance between two reads); the change did not help placement.
+  The commitment stands: no attempt 3 before the test.
 - **`minimap2_train` added (18 Nov 2026), after seeing the validation table.** `minimap2` indexes the full
   panel genomes, so a known species' validation and test reads align to the exact sequence they came
   from; H6 and section 8 already said this favours it. `minimap2_train` indexes only the training blocks,
