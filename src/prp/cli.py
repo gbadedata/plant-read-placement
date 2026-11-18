@@ -124,11 +124,72 @@ def cmd_windows(args):
     build_windows(panel, exp, layout)
 
 
+def _gpu_groups(layout, splits: list[str], n_gpus: int) -> list[list[str]]:
+    """Assign splits to GPUs, largest first, so the windows each GPU embeds are roughly balanced."""
+    sizes = {s: int(np.load(layout.windows(s))["read_index"].shape[0]) for s in splits}
+    groups: list[list[str]] = [[] for _ in range(n_gpus)]
+    load = [0] * n_gpus
+    for s in sorted(splits, key=lambda x: -sizes[x]):
+        g = load.index(min(load))
+        groups[g].append(s)
+        load[g] += sizes[s]
+    return [g for g in groups if g]
+
+
+def _embed_on_gpus(args, layout) -> None:
+    """Run one child `prp embed` per GPU (CUDA_VISIBLE_DEVICES), each on its own splits, in parallel."""
+    import os
+    import subprocess
+    import threading
+
+    n = int(os.environ.get("PRP_EMBED_GPUS", "0") or 0) or __import__("torch").cuda.device_count()
+    groups = _gpu_groups(layout, args.splits, n)
+    print(f"[embed] {len(groups)} GPUs in parallel: " + "; ".join(f"gpu{i}: {' '.join(g)}" for i, g in enumerate(groups)), flush=True)
+    procs = []
+    for i, group in enumerate(groups):
+        cmd = [sys.executable, "-m", "prp.cli", "embed", "--panel", args.panel, "--config", args.config,
+               "--encoder", args.encoder, "--splits", *group]
+        for flag, val in (("--name", args.name), ("--checkpoint", args.checkpoint),
+                          ("--batch-size", args.batch_size), ("--amp", args.amp)):
+            if val:
+                cmd += [flag, str(val)]
+        env = {k: v for k, v in os.environ.items() if k != "PYTHONPATH"}
+        env.update(CUDA_VISIBLE_DEVICES=str(i), PRP_EMBED_CHILD="1")
+        p = subprocess.Popen(cmd, env=env, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, bufsize=1)
+
+        def pump(proc=p, tag=f"gpu{i}"):
+            for line in proc.stdout:
+                print(f"[{tag}] {line}", end="", flush=True)
+
+        t = threading.Thread(target=pump, daemon=True)
+        t.start()
+        procs.append((p, t))
+    codes = []
+    for p, t in procs:
+        codes.append(p.wait())
+        t.join()
+    if any(codes):
+        sys.exit(f"error: embedding failed on GPU(s) {[i for i, c in enumerate(codes) if c]}")
+
+
 def cmd_embed(args):
+    import os
+
     from .embed import embed_split
     from .encoders import make_encoder
 
     panel, exp, layout = _ctx(args)
+    etype = exp["encoders"][args.encoder]["type"]
+    if etype in ("plantcad", "toycnn") and len(args.splits) > 1 and not os.environ.get("PRP_EMBED_CHILD") \
+            and not args.one_process:
+        n = int(os.environ.get("PRP_EMBED_GPUS", "0") or 0)
+        if not n:
+            import torch
+
+            n = torch.cuda.device_count()
+        if n > 1:
+            _embed_on_gpus(args, layout)
+            return
     if args.amp:
         exp.raw["encoders"][args.encoder]["amp"] = args.amp
     enc = make_encoder(args.encoder, exp, checkpoint=args.checkpoint)
@@ -343,6 +404,7 @@ def build_parser() -> argparse.ArgumentParser:
     e.add_argument("--batch-size", type=int)
     e.add_argument("--splits", nargs="+", default=["train", "val", "test"])
     e.add_argument("--amp", choices=["none", "fp16", "bf16"], help="override encoders.<name>.amp")
+    e.add_argument("--one-process", action="store_true", help="do not spread splits across multiple GPUs")
     add("train-head", cmd_train_head, "train the contrastive head").add_argument("--features", required=True)
     f = add("finetune", cmd_finetune, "adapt encoder layers on noisy reads")
     f.add_argument("--encoder")

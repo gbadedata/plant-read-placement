@@ -29,3 +29,14 @@ def test_toy_pipeline_runs_and_locks(tmp_path, monkeypatch):
     assert res["methods"]["minimap2"]["5"]["balanced_accuracy"] > 0.6
     assert (out / "prereg.lock.json").exists() and (out / "TEST_RUN.json").exists()
     assert (out / "work" / "results" / "test" / "RESULTS.md").read_text().startswith("# Plant read placement")
+
+    # Spreading splits over two "GPUs" (forced; child processes on CPU here) must give identical features.
+    import numpy as np
+
+    monkeypatch.setenv("PRP_EMBED_GPUS", "2")
+    main(["embed", "--encoder", "toycnn", "--name", "toycnn_two", "--panel", "configs/panel.yaml",
+          "--config", "configs/experiment.yaml"])
+    for split in ("train", "val", "test"):
+        a = np.load(out / "work" / "features" / "toycnn" / f"{split}.npy")
+        b = np.load(out / "work" / "features" / "toycnn_two" / f"{split}.npy")
+        assert np.allclose(a, b, atol=1e-6)
