@@ -280,3 +280,10 @@ def test_finetune_shrinks_batch_on_first_step_oom(tmp_path, monkeypatch):
     eff = log["effective_batch"]
     assert 6 * eff["reads_per_species"] * eff["windows_per_read"] <= 8  # six training species in the toy set
     assert (out / "work" / "models" / "ft" / "encoder.pt").exists()
+    rec = log["log"][-1]
+    for key in ("train_loss_mean", "untrained_loss", "skipped_steps", "encoder_grad_norm_mean",
+                "encoder_weight_change_rel", "lr_backbone"):
+        assert key in rec, key
+    assert log["skipped_steps"] == 0  # no fp16 scaler on CPU
+    assert rec["encoder_weight_change_rel"] > 0  # the encoder actually moved
+    assert rec["untrained_loss"] > 0

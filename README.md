@@ -73,7 +73,8 @@ PlantCAD2 (8,192 bp context) is a drop-in option in `configs/experiment.yaml`.
 
 ## Methods compared
 
-`plantcad_head` (primary), `plantcad_ft_head` (backbone adapted on noisy windows), `plantcad_raw`,
+`plantcad_head` (primary), `plantcad_ft2_head` (backbone adapted on noisy windows; attempt 1,
+`plantcad_ft_head`, did not adapt and is kept as a record), `plantcad_raw`,
 `kmer_head`, `kmer_raw` and `minimap2`, all through the same specimen builder, decision rule and
 calibration. Specimens of 1, 10 and 50 reads. Full definitions in [PREREG.md](PREREG.md).
 

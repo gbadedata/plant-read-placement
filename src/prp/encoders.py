@@ -252,7 +252,7 @@ def make_encoder(name: str, exp, trainable_regex: list[str] | None = None, check
     else:
         raise ValueError(f"unknown encoder type {t}")
     if checkpoint:
-        state = torch.load(checkpoint, map_location="cpu")
+        state = torch.load(checkpoint, map_location="cpu", weights_only=True)
         missing, unexpected = enc.load_state_dict(state["encoder"], strict=False)
         if unexpected:
             raise RuntimeError(f"unexpected keys loading {checkpoint}: {unexpected[:5]}")

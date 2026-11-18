@@ -55,7 +55,8 @@ Run long steps inside `tmux` (`tmux new -s prp`; reattach with `tmux attach -t p
 | 10 | Kaggle notebook cells 6-10: embed, fine-tune, re-embed, heads, pack | Kaggle | 2-4 h |
 | 11 | download `gpu_outputs.zip`; `cd work && python -m zipfile -e /mnt/c/Users/<you>/Downloads/gpu_outputs.zip .` | laptop | minutes |
 | 12 | `prp train-head --features kmer` | laptop | 5-10 min |
-| 13 | `prp dev --methods kmer_raw kmer_head plantcad_raw plantcad_head plantcad_ft_head minimap2` | laptop | 10 min |
+| 12b | fine-tune retry on Kaggle (cells 1-5, then 7-10 with `RUN_ATTEMPT_1_STEPS = False`); download `gpu_outputs_r2.zip`; `cd work && python -m zipfile -e /mnt/c/Users/<you>/Downloads/gpu_outputs_r2.zip .` | Kaggle / laptop | about 4 h |
+| 13 | `prp dev --methods kmer_raw kmer_head plantcad_raw plantcad_head plantcad_ft_head plantcad_ft2_head minimap2` | laptop | 10 min |
 | 14 | fill every `TBD` in `PREREG.md` from `work/results/val/RESULTS.md`; commit and push | laptop | |
 | 15 | `prp freeze`; commit `prereg.lock.json`; push | laptop | seconds |
 | 16 | `prp evaluate --split test --methods <same list>` | laptop | 10 min |
@@ -96,7 +97,7 @@ test run.
 ## 4. If time is short
 
 In priority order: `plantcad_head`, `kmer_head`, `minimap2` with `specimen_sizes: [1, 10]`; then add
-`plantcad_ft_head`; then `plantcad_raw`, `kmer_raw` and n = 50. Reducing `simulate.reads` to
+`plantcad_ft2_head`; then `plantcad_raw`, `kmer_raw` and n = 50. Reducing `simulate.reads` to
 `{train: 2000, val: 600, test: 600}` roughly halves simulation and embedding time. Make these
 changes before freezing.
 

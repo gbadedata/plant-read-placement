@@ -67,6 +67,17 @@ def _cosine_lr(step: int, total: int, base: float, warmup: int = 100) -> float:
     return base * 0.5 * (1 + math.cos(math.pi * min(p, 1.0)))
 
 
+def untrained_loss(sp: torch.Tensor, ge: torch.Tensor, fa: torch.Tensor, dim: int, hcfg: dict, draws: int = 50) -> float:
+    """Loss of random embeddings on this batch's labels: what 'learned nothing' looks like at this batch size."""
+    g = torch.Generator().manual_seed(0)
+    vals = []
+    for _ in range(draws):
+        z = torch.nn.functional.normalize(torch.randn(len(sp), dim, generator=g), dim=1)
+        vals.append(hierarchical_supcon(z, sp.cpu(), ge.cpu(), fa.cpu(), float(hcfg["temperature"]),
+                                        float(hcfg["lambda_genus"]), float(hcfg["lambda_family"]))[0].item())
+    return float(np.mean(vals))
+
+
 def train_head(layout: Layout, exp, features: str, out_name: str | None = None) -> dict:
     cfg = exp["head"]
     out_name = out_name or f"{features}_head"
@@ -198,6 +209,11 @@ def finetune_encoder(layout: Layout, exp, encoder_name: str, out_name: str) -> d
     steps = int(cfg["steps"])
     log, best = [], {"score": -1.0}
     reductions: list[dict] = []
+    # Diagnostics, so a run that does not learn can be told apart from one whose updates were skipped or too small
+    start = {n: p.detach().clone() for n, p in enc.named_parameters() if p.requires_grad}
+    start_norm = float(torch.sqrt(sum((v.float() ** 2).sum() for v in start.values())))
+    acc = {"loss": 0.0, "n": 0, "skipped": 0, "gnorm": 0.0, "gn": 0}
+    skipped_total, reference = 0, None
     t0 = time.time()
     step = 0
     while step < steps:
@@ -215,6 +231,10 @@ def finetune_encoder(layout: Layout, exp, encoder_name: str, out_name: str) -> d
                                               float(hcfg["lambda_genus"]), float(hcfg["lambda_family"]))
             opt.zero_grad(set_to_none=True)
             scaler.scale(loss).backward()
+            scaler.unscale_(opt)
+            grads = [p.grad.detach().float().norm() for p in enc_params if p.grad is not None]
+            gnorm = float(torch.stack(grads).norm()) if grads else 0.0
+            scale_before = scaler.get_scale()
             scaler.step(opt)
             scaler.update()
         except torch.OutOfMemoryError:
@@ -237,17 +257,39 @@ def finetune_encoder(layout: Layout, exp, encoder_name: str, out_name: str) -> d
             reductions.append(change)
             print(f"[finetune] out of GPU memory on the first step; batch reduced {change}", flush=True)
             continue
+        skipped = use_scaler and scaler.get_scale() < scale_before  # the scaler found inf/NaN and skipped the update
+        skipped_total += int(skipped)
+        acc["skipped"] += int(skipped)
+        acc["loss"] += loss.item()
+        acc["n"] += 1
+        if math.isfinite(gnorm):
+            acc["gnorm"] += gnorm
+            acc["gn"] += 1
         if step == 0:
             peak = torch.cuda.max_memory_allocated() / 2**30 if device.type == "cuda" else 0.0
+            reference = untrained_loss(t_sp[idx], t_ge[idx], t_fa[idx], int(hcfg["out_dim"]), hcfg)
             print(f"[finetune] first step OK: {len(rows)} reads x {W} windows per step, "
-                  f"peak GPU memory {peak:.1f} GiB", flush=True)
+                  f"peak GPU memory {peak:.1f} GiB; a model that has learned nothing scores loss {reference:.2f}",
+                  flush=True)
         if (step + 1) % int(cfg["eval_every"]) == 0 or step == steps - 1:
             m = monitor(embed_reads(tr_reads, mon_tr, tr_win), tr_reads.iloc[mon_tr].reset_index(drop=True),
                         embed_reads(va_reads, mon_va, va_win), va_reads.iloc[mon_va].reset_index(drop=True))
-            rec = {"step": step + 1, "loss": loss.item(), **parts, **m, "seconds": round(time.time() - t0, 1)}
+            with torch.no_grad():
+                moved = float(torch.sqrt(sum(((p.detach().float() - start[n].float()) ** 2).sum()
+                                             for n, p in enc.named_parameters() if n in start)))
+            diag = {"train_loss_mean": acc["loss"] / max(1, acc["n"]), "untrained_loss": reference,
+                    "skipped_steps": acc["skipped"], "loss_scale": float(scaler.get_scale()) if use_scaler else None,
+                    "encoder_grad_norm_mean": acc["gnorm"] / max(1, acc["gn"]),
+                    "encoder_weight_change_rel": moved / max(start_norm, 1e-12),
+                    "lr_backbone": opt.param_groups[0]["lr"]}
+            rec = {"step": step + 1, "loss": loss.item(), **parts, **m, **diag, "seconds": round(time.time() - t0, 1)}
             log.append(rec)
-            print(f"[finetune] {out_name} step {step + 1}: loss {loss.item():.3f} "
-                  f"val known-species {m['known_species_acc']:.3f} relative-genus {m['relative_genus_acc']:.3f}", flush=True)
+            print(f"[finetune] {out_name} step {step + 1}: loss {diag['train_loss_mean']:.3f} (mean since last line; "
+                  f"untrained {reference:.2f}) | val known-species {m['known_species_acc']:.3f} "
+                  f"relative-genus {m['relative_genus_acc']:.3f} | encoder moved {100 * diag['encoder_weight_change_rel']:.3f}% "
+                  f"grad norm {diag['encoder_grad_norm_mean']:.3g} | skipped {acc['skipped']} steps | "
+                  f"{rec['seconds'] / 60:.0f} min", flush=True)
+            acc = {"loss": 0.0, "n": 0, "skipped": 0, "gnorm": 0.0, "gn": 0}
             if m["score"] > best["score"]:
                 best = {**rec}
                 trainable = {n for n, p in enc.named_parameters() if p.requires_grad}
@@ -256,9 +298,10 @@ def finetune_encoder(layout: Layout, exp, encoder_name: str, out_name: str) -> d
                             "trainable_regex": cfg.get("trainable_regex")}, layout.model_dir(out_name) / "encoder.pt")
         step += 1
     summary = {"encoder": encoder_name, "out": out_name, "n_trainable": int(enc.n_trainable), "best": best,
-               "log": log, "config": cfg, "batch_reductions": reductions,
+               "log": log, "config": cfg, "batch_reductions": reductions, "skipped_steps": skipped_total,
+               "untrained_loss": reference,
                "effective_batch": {"reads_per_species": sampler.K, "windows_per_read": W}}
     (layout.model_dir(out_name) / "finetune_log.json").write_text(json.dumps(summary, indent=2))
     print(f"[finetune] {out_name}: best step {best.get('step')} score {best['score']:.3f}; "
-          f"{enc.n_trainable:,} trainable encoder parameters")
+          f"{enc.n_trainable:,} trainable encoder parameters; {skipped_total} of {steps} updates skipped")
     return summary

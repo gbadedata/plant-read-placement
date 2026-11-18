@@ -32,7 +32,7 @@ alignment baseline (minimap2) and an alignment-free composition baseline (k-mers
 | id | features | trained part |
 |---|---|---|
 | `plantcad_head` | PlantCaduceus l20, frozen, strand-averaged, mean over 512 bp windows | contrastive head |
-| `plantcad_ft_head` | PlantCaduceus l20 with top blocks adapted on noisy read windows | contrastive head |
+| `plantcad_ft2_head` | PlantCaduceus l20 with top blocks adapted on noisy read windows (attempt 2; see development log) | contrastive head |
 | `plantcad_raw` | PlantCaduceus l20, frozen | none (ablation) |
 | `kmer_head` | canonical 5-mer frequencies | contrastive head (ablation: same head, no language model) |
 | `kmer_raw` | canonical 5-mer frequencies | none |
@@ -42,7 +42,8 @@ Contrastive head: supervised contrastive loss at species level plus genus (weigh
 (weight 0.25) terms, trained on panel species' training-region reads only. The checkpoint with the
 best validation score is kept.
 
-If `plantcad_ft_head` has not finished before freezing, it is reported as not run, not dropped silently.
+If `plantcad_ft2_head` has not finished before freezing, it is reported as not run, not dropped silently.
+`plantcad_ft_head` (fine-tune attempt 1) is reported on validation as a record and is not evaluated on test.
 
 ## 4. Decision rule and calibration (fixed)
 
@@ -73,7 +74,7 @@ different species and some shrinkage is expected. Write the validation value nex
 | H2 | `plantcad_head` minus `kmer_head` balanced accuracy at n = 10 (does the language model add anything over composition?) | TBD | >= TBD |
 | H3 | `plantcad_head` AUROC new vs rest at n = 10 | TBD | >= TBD |
 | H4 | `plantcad_head` relative-genus rate at n = 10 | TBD | >= TBD |
-| H5 | `plantcad_ft_head` minus `plantcad_head` balanced accuracy at n = 10 (does adapting the backbone help?) | TBD | >= TBD |
+| H5 | `plantcad_ft2_head` minus `plantcad_head` balanced accuracy at n = 10 (does adapting the backbone help?) | TBD | >= TBD |
 | H6 | `minimap2` minus `plantcad_head` balanced accuracy at n = 10 (prediction stated in advance; minimap2 is expected to lead on known species because it indexes their full genomes) | TBD | <= TBD |
 
 A hypothesis is met if the test point estimate reaches its target. With 4 to 13 species per class
@@ -97,6 +98,22 @@ and will be labelled as such.
 - Few held-out species per class, so species-level intervals are wide.
 - The second deliverable in the brief (flagging alkaloid-biosynthesis genes) is not attempted here.
 
-## 9. Deviations
+## 9. Development log (before freezing)
+
+Changes made on validation before the lock, kept here so they are visible next to the plan.
+
+- **Fine-tune attempt 1 (18 Nov 2026).** Top four blocks and the final norm, 1 window per read,
+  4 reads per species (52 windows per step), backbone learning rate 2e-5, 3,000 steps, fp16 on a T4.
+  The first configuration (4 windows per read, 208 per step) ran out of GPU memory and was reduced
+  to this before any step completed. Result: training loss fell from 7.55 (random embeddings on the
+  same labels) to about 6.85 by step 250 and stayed there; features from the adapted encoder gave the
+  same validation score as the frozen model (best 0.569 for both heads). The encoder did not adapt
+  measurably, so this run says nothing about whether adapting helps.
+- **Fine-tune attempt 2: the only retry.** Settings fixed before it runs: 3 windows per read (156 per
+  step), backbone learning rate 1e-4, everything else unchanged. Added logging of skipped fp16 updates,
+  encoder gradient norm and how far the weights move. Whatever attempt 2 gives is the `plantcad_ft2_head`
+  result; there is no attempt 3 before the test.
+
+## 10. Deviations
 
 Recorded automatically in `TEST_RUN.json` and summarised in the results.

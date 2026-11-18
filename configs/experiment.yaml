@@ -59,17 +59,19 @@ finetune:
   # and caduceus.backbone.norm_f (modeling_caduceus.py); 16-19 assumes the 20-layer l20 model.
   # `prp gpu-check` prints the real layer count and a suggested pattern if this does not match.
   trainable_regex: ["layers\\.(1[6-9])\\.", "norm_f"]
-  # Memory: each trainable block runs Mamba four times (two directions x two strands) and keeps its
-  # activations for the backward pass, about 85 MB per 512 bp window across four blocks. A 16 GB T4
-  # ran out at 208 windows per step (13 species x 4 reads x 4 windows), so: 4 reads x 1 window per
-  # species (52 windows, about 5 GB) and more steps. If the first step still runs out of memory the
-  # run halves the batch and records it in finetune_log.json.
-  windows_per_read: 1
+  # Attempt 1 (18 Nov 2026; 1 window per read, lr_backbone 2e-5) did not adapt the encoder: training
+  # loss fell from 7.55 (untrained) to about 6.85 by step 250 and stayed there, and its features gave
+  # the same validation score as the frozen model (0.569 both). This is the single pre-committed retry
+  # (see PREREG.md, development log), run as plantcad_adapted_r2 -> features plantcad_ft2:
+  #   - 3 windows per read: attempt 1 peaked at 3.9 GiB for 52 windows, so 156 should need about 11 GiB
+  #     of the T4's 14.5. If the first step still runs out of memory, the batch is halved and logged.
+  #   - lr_backbone 1e-4 (5x): 2e-5 barely moved the weights in 3,000 steps.
+  windows_per_read: 3
   monitor_windows: 4
   species_per_batch: 0
   reads_per_species: 4
   steps: 3000
-  lr_backbone: 2.0e-5
+  lr_backbone: 1.0e-4
   lr_head: 1.0e-3
   eval_every: 250
 
