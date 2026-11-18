@@ -353,6 +353,20 @@ def cmd_check_panel(args):
         print(f"  warning: {w}")
 
 
+def cmd_explore(args):
+    from .report import explore_distances
+
+    panel, exp, layout = _ctx(args)
+    sizes = [int(n) for n in exp["evaluation"]["specimen_sizes"]]
+    df = explore_distances(layout, args.split, args.methods, sizes)
+    cols = ["method", "n", "known: nearest species right", "relative: nearest genus right",
+            "d1 AUROC known vs relative", "d1 AUROC relative vs new", "relatives called known",
+            "relatives called relative", "relatives called new"]
+    short = ["method", "n", "kn_sp_ok", "rel_ge_ok", "auc_kn_rel", "auc_rel_new", "rel->known", "rel->rel", "rel->new"]
+    print(df[cols].set_axis(short, axis=1).to_string(index=False, float_format=lambda v: f"{v:.2f}"))
+    print(f"[explore] written to {layout.results(args.split) / 'EXPLORE_distances.md'}")
+
+
 def cmd_run_toy(args):
     """Every stage on the toy data set, ending with a frozen preregistration and a test run."""
     steps = [
@@ -424,6 +438,9 @@ def build_parser() -> argparse.ArgumentParser:
     g.add_argument("--split", default="val")
     g.add_argument("--n", type=int, default=128)
     g.add_argument("--amp", choices=["none", "fp16", "bf16"])
+    ex = add("explore", cmd_explore, "exploratory: where each class goes and why (reads saved scores only)")
+    ex.add_argument("--split", choices=["val", "test"], default="val")
+    ex.add_argument("--methods", nargs="+", required=True)
     add("run-toy", cmd_run_toy, "run every stage on the toy data set")
     return p
 

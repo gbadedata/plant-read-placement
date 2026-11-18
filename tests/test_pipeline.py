@@ -29,6 +29,10 @@ def test_toy_pipeline_runs_and_locks(tmp_path, monkeypatch):
     assert res["methods"]["minimap2"]["5"]["balanced_accuracy"] > 0.6
     assert (out / "prereg.lock.json").exists() and (out / "TEST_RUN.json").exists()
     assert (out / "work" / "results" / "test" / "RESULTS.md").read_text().startswith("# Plant read placement")
+    main(["explore", "--methods", "kmer_head", "toycnn_head", "minimap2", "--panel", "configs/panel.yaml",
+          "--config", "configs/experiment.yaml"])
+    explore = (out / "work" / "results" / "val" / "EXPLORE_distances.md").read_text()
+    assert "Not a preregistered analysis" in explore and "toycnn_head" in explore
 
     # Spreading splits over two "GPUs" (forced; child processes on CPU here) must give identical features.
     import numpy as np
