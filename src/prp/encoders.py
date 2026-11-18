@@ -113,13 +113,25 @@ class PlantCADEncoder(nn.Module):
             hf_model = AutoModelForMaskedLM.from_pretrained(model, trust_remote_code=True,
                                                             local_files_only=local_files_only)
         self.model = hf_model.to(self.device_)
-        # token ids for our codes A,C,G,T,N and any special tokens the tokenizer adds around a sequence
-        plain = tok.convert_tokens_to_ids(list("ACGTN"))
-        full = tok.encode_plus("ACGTN", return_attention_mask=False, return_token_type_ids=False)["input_ids"]
-        full = list(full)
+        # Token ids for our codes A,C,G,T,N, taken from the same encode path the PlantCaduceus example uses
+        # (tokenizer vocabularies differ: PlantCaduceus maps upper-case bases through its own normalisation,
+        # so a direct vocabulary lookup of "A" can return the unknown-token id), plus any special tokens the
+        # tokenizer adds around a sequence by default.
+        def _ids(text: str, special: bool) -> list[int]:
+            return list(tok.encode_plus(text, add_special_tokens=special, return_attention_mask=False,
+                                        return_token_type_ids=False)["input_ids"])
+
+        plain = _ids("ACGTN", special=False)
+        if len(plain) != 5 or [_ids(b, special=False) for b in "ACGTN"] != [[i] for i in plain]:
+            raise RuntimeError(f"tokenizer is not single-nucleotide: 'ACGTN' -> {plain}")
+        if len(set(plain[:4])) != 4:
+            raise RuntimeError(f"A, C, G and T do not map to four distinct token ids: {plain[:4]}")
+        full = _ids("ACGTN", special=True)
         pos = next((i for i in range(len(full) - 4) if full[i : i + 5] == plain), None)
         if pos is None:
             raise RuntimeError(f"cannot locate nucleotide tokens in tokenizer output {full} vs {plain}")
+        self.token_ids = {"A": plain[0], "C": plain[1], "G": plain[2], "T": plain[3], "N": plain[4],
+                          "prefix": full[:pos], "suffix": full[pos + 5 :]}
         self.prefix = torch.tensor(full[:pos], dtype=torch.long)
         self.suffix = torch.tensor(full[pos + 5 :], dtype=torch.long)
         self.lut = torch.tensor(plain, dtype=torch.long)

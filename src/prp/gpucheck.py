@@ -42,6 +42,8 @@ def run_check(enc, sample: np.ndarray, configured_amp: str, batch_size: int, tot
                    bf16_supported=bool(torch.cuda.is_bf16_supported()))
     names = enc.param_names() if hasattr(enc, "param_names") else [n for n, _ in enc.named_parameters()]
     out["layers"] = layer_report(names, patterns)
+    out["token_ids"] = getattr(enc, "token_ids", None)
+    out["rc_combine"] = getattr(enc, "rc", None)
     enc.amp = "none"
     e32 = enc.embed_windows(sample)
     erc = enc.embed_windows(np.stack([revcomp_codes(w) for w in sample]))

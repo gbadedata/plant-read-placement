@@ -3,7 +3,7 @@ from __future__ import annotations
 import numpy as np
 import pytest
 import torch
-from conftest import FakeRCPSModel, FakeTokenizer, make_panel
+from conftest import COMP_ID_PLANTCAD, FakePlantCADTokenizer, FakeRCPSModel, FakeTokenizer, make_panel
 
 from prp.config import ConfigError, Species, load_experiment
 from prp.encoders import KmerEncoder, PlantCADEncoder, canonical_kmer_table, combine_strands
@@ -139,6 +139,29 @@ def test_plantcad_wrapper_tokens_and_strand_invariance(rng):
     a = enc.embed_windows(w)
     b = enc.embed_windows(np.stack([revcomp_codes(x) for x in w]))
     assert a.shape == (4, 6) and np.allclose(a, b, atol=1e-5)
+
+
+def test_plantcad_tokenizer_behaviour_seen_on_kaggle(rng):
+    tok = FakePlantCADTokenizer()
+    assert tok.convert_tokens_to_ids(list("ACGTN")) == [2, 2, 2, 2, 2]  # the lookup that broke the first version
+    enc = PlantCADEncoder("fake", device="cpu", amp="none",
+                          components=(tok, FakeRCPSModel(6, comp=COMP_ID_PLANTCAD)))
+    assert enc.lut.tolist() == [3, 4, 5, 6, 2] and enc.prefix.tolist() == [] and enc.suffix.tolist() == []
+    w = rng.integers(0, 4, (4, 512)).astype(np.uint8)
+    ids = enc._ids(torch.from_numpy(w))
+    assert ids.shape == (4, 512) and set(ids.unique().tolist()) <= {3, 4, 5, 6}
+    a = enc.embed_windows(w)
+    b = enc.embed_windows(np.stack([revcomp_codes(x) for x in w]))
+    assert np.allclose(a, b, atol=1e-5)
+
+
+def test_tokenizer_that_is_not_single_nucleotide_is_refused():
+    class KmerTok:
+        def encode_plus(self, seq, add_special_tokens=True, **kw):
+            return {"input_ids": [7] * max(1, len(seq) // 2)}
+
+    with pytest.raises(RuntimeError, match="not single-nucleotide"):
+        PlantCADEncoder("fake", device="cpu", amp="none", components=(KmerTok(), FakeRCPSModel(6)))
 
 
 def test_plantcad_trainable_regex():

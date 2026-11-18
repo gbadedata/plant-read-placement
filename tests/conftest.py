@@ -34,16 +34,33 @@ def panel():
 
 VOCAB = {"[SEP]": 1, "A": 7, "C": 8, "G": 9, "T": 10, "N": 11}
 COMP_ID = {7: 10, 10: 7, 8: 9, 9: 8, 11: 11, 1: 1}
+COMP_ID_PLANTCAD = {3: 6, 6: 3, 4: 5, 5: 4, 2: 2}
 
 
 class FakeTokenizer:
-    """Character tokenizer that appends [SEP], like the Caduceus/HyenaDNA style tokenizers."""
+    """Character tokenizer that appends [SEP] by default, like the generic Caduceus tokenizer."""
 
     def convert_tokens_to_ids(self, toks):
         return [VOCAB[t] for t in toks]
 
-    def encode_plus(self, seq, return_attention_mask=False, return_token_type_ids=False):
-        return {"input_ids": [VOCAB[c] for c in seq] + [VOCAB["[SEP]"]]}
+    def encode_plus(self, seq, add_special_tokens=True, return_attention_mask=False, return_token_type_ids=False):
+        ids = [VOCAB[c] for c in seq.upper()]
+        return {"input_ids": ids + ([VOCAB["[SEP]"]] if add_special_tokens else [])}
+
+
+PLANTCAD_VOCAB = {"[PAD]": 0, "[MASK]": 1, "[UNK]": 2, "a": 3, "c": 4, "g": 5, "t": 6}
+
+
+class FakePlantCADTokenizer:
+    """Mirrors what PlantCaduceus's tokenizer did on Kaggle (18 Nov 2026): a direct lookup of upper-case
+    bases gives [UNK] ([2, 2, 2, 2, 2]); encoding normalises case, so 'ACGTN' -> [3, 4, 5, 6, 2]
+    (N is unknown) and no special tokens are added."""
+
+    def convert_tokens_to_ids(self, toks):
+        return [PLANTCAD_VOCAB.get(t, 2) for t in toks]
+
+    def encode_plus(self, seq, add_special_tokens=True, return_attention_mask=False, return_token_type_ids=False):
+        return {"input_ids": [PLANTCAD_VOCAB.get(c, 2) for c in seq.lower()]}
 
 
 class _Out:
@@ -55,13 +72,13 @@ class FakeRCPSModel(nn.Module):
     """Copies the Caduceus RCPS output layout (modeling_caduceus.py): channels are
     [forward stream | reverse-complement stream flipped along sequence AND channel axes]."""
 
-    def __init__(self, H: int = 6):
+    def __init__(self, H: int = 6, comp: dict | None = None):
         super().__init__()
         self.config = type("C", (), {"rcps": True})()
         self.emb = nn.Embedding(16, H)
         self.backbone = nn.Linear(H, H)
         lut = torch.arange(16)
-        for a, b in COMP_ID.items():
+        for a, b in (comp or COMP_ID).items():
             lut[a] = b
         self.register_buffer("comp", lut)
 
