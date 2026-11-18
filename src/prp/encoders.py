@@ -113,6 +113,9 @@ class PlantCADEncoder(nn.Module):
             hf_model = AutoModelForMaskedLM.from_pretrained(model, trust_remote_code=True,
                                                             local_files_only=local_files_only)
         self.model = hf_model.to(self.device_)
+        if amp == "bf16" and self.device_.type == "cuda" and torch.cuda.get_device_capability(self.device_) < (8, 0):
+            raise RuntimeError(f"amp: bf16 needs an Ampere or newer GPU (found {torch.cuda.get_device_name(self.device_)}); "
+                               "use fp16 or none")
         # Token ids for our codes A,C,G,T,N, taken from the same encode path the PlantCaduceus example uses
         # (tokenizer vocabularies differ: PlantCaduceus maps upper-case bases through its own normalisation,
         # so a direct vocabulary lookup of "A" can return the unknown-token id), plus any special tokens the
