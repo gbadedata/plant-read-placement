@@ -8,7 +8,7 @@ version = "0.1.0"
 description = "Place plant specimens from noisy Nanopore reads with a plant DNA language model, benchmarked against minimap2 and k-mer baselines under a frozen preregistration."
 readme = "README.md"
 requires-python = ">=3.10"
-license = { text = "MIT" }
+license = "MIT"
 authors = [{ name = "Oluwagbade Odimayo" }]
 dependencies = [
   "numpy>=1.24",
