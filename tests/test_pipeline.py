@@ -21,12 +21,16 @@ def test_toy_pipeline_runs_and_locks(tmp_path, monkeypatch):
     monkeypatch.chdir(out)
     main(["run-toy", "--panel", "configs/panel.yaml", "--config", "configs/experiment.yaml"])
     res = json.loads((out / "work" / "results" / "test" / "metrics.json").read_text())
-    assert set(res["methods"]) == {"kmer_raw", "kmer_head", "toycnn_head", "toycnn_ft_head", "minimap2"}
+    assert set(res["methods"]) == {"kmer_raw", "kmer_head", "toycnn_head", "toycnn_ft_head", "minimap2", "minimap2_train"}
     for by_n in res["methods"].values():
         for m in by_n.values():
             assert 0.0 <= m["balanced_accuracy"] <= 1.0
     # minimap2 has true homology to the panel on the toy data, so it must clear chance comfortably
     assert res["methods"]["minimap2"]["5"]["balanced_accuracy"] > 0.6
+    # the training-blocks-only index is a different, smaller reference: its hits must come from it
+    full = (out / "work" / "baselines" / "minimap2" / "test.hits.tsv").read_text()
+    train = (out / "work" / "baselines" / "minimap2_train" / "test.hits.tsv").read_text()
+    assert full != train
     assert (out / "prereg.lock.json").exists() and (out / "TEST_RUN.json").exists()
     assert (out / "work" / "results" / "test" / "RESULTS.md").read_text().startswith("# Plant read placement")
     main(["explore", "--methods", "kmer_head", "toycnn_head", "minimap2", "--panel", "configs/panel.yaml",

@@ -41,21 +41,22 @@ def method_transform(layout, method: str):
     if method.endswith("_head"):
         feat = method[: -len("_head")]
         return feat, HeadTransform(load_head(layout, method))
-    raise ValueError(f"method must be minimap2, <features>_raw or <features>_head (got {method})")
+    raise ValueError(f"method must be minimap2, minimap2_train, <features>_raw or <features>_head (got {method})")
 
 
 def compute_scores(panel, exp, layout, method: str, split: str) -> dict[int, pd.DataFrame]:
     from .embed import load_features
-    from .minimap import map_split, score_minimap
+    from .minimap import map_split, method_reference, score_minimap
     from .placement import prototypes, score_embeddings
     from .windows import load_reads
 
     ev = exp["evaluation"]
     reads = load_reads(layout, split)
     out = {}
-    if method == "minimap2":
-        p = layout.minimap_hits(split)
-        hits = pd.read_csv(p, sep="\t") if p.exists() else map_split(panel, exp, layout, split)
+    ref = method_reference(method)
+    if ref is not None:
+        p = layout.minimap_hits(split, ref)
+        hits = pd.read_csv(p, sep="\t") if p.exists() else map_split(panel, exp, layout, split, ref)
         for n in ev["specimen_sizes"]:
             out[int(n)] = score_minimap(hits, reads, panel, int(n), int(ev["max_specimens_per_species"]), exp.seed)
     else:
@@ -223,7 +224,7 @@ def cmd_minimap(args):
 
     panel, exp, layout = _ctx(args)
     for split in args.splits:
-        map_split(panel, exp, layout, split)
+        map_split(panel, exp, layout, split, args.reference)
 
 
 def cmd_dev(args):
@@ -375,10 +376,11 @@ def cmd_run_toy(args):
         ["finetune", "--encoder", "toycnn", "--name", "toycnn_adapted"],
         ["embed", "--encoder", "toycnn", "--checkpoint", "work/models/toycnn_adapted/encoder.pt", "--name", "toycnn_ft"],
         ["train-head", "--features", "kmer"], ["train-head", "--features", "toycnn"], ["train-head", "--features", "toycnn_ft"],
-        ["minimap", "--splits", "val", "test"],
-        ["dev", "--methods", "kmer_raw", "kmer_head", "toycnn_head", "toycnn_ft_head", "minimap2"],
+        ["minimap", "--splits", "val", "test"], ["minimap", "--splits", "val", "test", "--reference", "train"],
+        ["dev", "--methods", "kmer_raw", "kmer_head", "toycnn_head", "toycnn_ft_head", "minimap2", "minimap2_train"],
         ["freeze"],
-        ["evaluate", "--split", "test", "--methods", "kmer_raw", "kmer_head", "toycnn_head", "toycnn_ft_head", "minimap2"],
+        ["evaluate", "--split", "test", "--methods", "kmer_raw", "kmer_head", "toycnn_head", "toycnn_ft_head", "minimap2",
+         "minimap2_train"],
     ]
     for s in steps:
         print(f"\n$ prp {' '.join(s)}")
@@ -424,7 +426,10 @@ def build_parser() -> argparse.ArgumentParser:
     f.add_argument("--encoder")
     f.add_argument("--name", required=True)
     f.add_argument("--amp", choices=["none", "fp16", "bf16"], help="override encoders.<name>.amp")
-    add("minimap", cmd_minimap, "minimap2 baseline").add_argument("--splits", nargs="+", default=["val"])
+    mm = add("minimap", cmd_minimap, "minimap2 baseline")
+    mm.add_argument("--splits", nargs="+", default=["val"])
+    mm.add_argument("--reference", choices=["full", "train"], default="full",
+                    help="full panel genomes (method minimap2) or training blocks only (method minimap2_train)")
     add("dev", cmd_dev, "score + calibrate + evaluate on validation").add_argument("--methods", nargs="+", required=True)
     add("freeze", cmd_freeze, "freeze the preregistration")
     ev = add("evaluate", cmd_evaluate, "evaluate (test requires a frozen preregistration)")

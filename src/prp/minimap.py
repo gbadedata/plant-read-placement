@@ -1,8 +1,14 @@
 """minimap2 baseline (via mappy): align every query read to each panel genome and keep the best hit.
 
-This is the standard alignment-based approach for Nanopore reads, and the reference database it
-uses is the *full* genome of every panel species, test regions included. That is deliberately
-generous to the baseline: a real reference database would contain the whole genome too.
+Two reference sets, reported as separate methods:
+
+- `minimap2` (reference="full"): the *full* genome of every panel species, validation and test regions
+  included. Generous to the baseline, as a real reference database would contain the whole genome, but
+  it means a known species' reads align to the exact sequence they were simulated from.
+- `minimap2_train` (reference="train"): only the training blocks of each panel genome, the same
+  sequence the learned methods were trained on. Reads from validation and test blocks then have to
+  align to other parts of their own genome (repeats, gene families) or not at all. Added on 18 Nov 2026,
+  before freezing, as a reference row with no hypothesis attached (PREREG.md, development log).
 
 Read similarity = matched bases in the best alignment / read length (0 if unmapped), which folds
 alignment identity and query coverage into one number. Specimen distance d1 = 1 - mean similarity.
@@ -32,7 +38,30 @@ def _read_sequences(panel: Panel, layout: Layout, split: str) -> dict[str, str]:
     return seqs
 
 
-def map_split(panel: Panel, exp, layout: Layout, split: str) -> pd.DataFrame:
+REFERENCES = ("full", "train")
+
+
+def reference_fasta(layout: Layout, sid: str, reference: str):
+    if reference == "full":
+        return layout.genome_fasta(sid)
+    if reference == "train":
+        path = layout.region_fasta(sid, "train")
+        if not path.exists():
+            raise FileNotFoundError(f"{path} not found: it is written by `prp split`; re-run that step")
+        return path
+    raise ValueError(f"reference must be one of {REFERENCES} (got {reference})")
+
+
+def method_reference(method: str) -> str | None:
+    """'minimap2' -> 'full', 'minimap2_train' -> 'train', anything else -> None."""
+    if method == "minimap2":
+        return "full"
+    if method.startswith("minimap2_") and method[len("minimap2_"):] in REFERENCES:
+        return method[len("minimap2_"):]
+    return None
+
+
+def map_split(panel: Panel, exp, layout: Layout, split: str, reference: str = "full") -> pd.DataFrame:
     import mappy
 
     cfg = exp["minimap2"]
@@ -49,7 +78,8 @@ def map_split(panel: Panel, exp, layout: Layout, split: str) -> pd.DataFrame:
     chunks = np.array_split(np.arange(n), max(1, threads * 4))
     for s in panel.panel_species():
         t0 = time.time()
-        aligner = mappy.Aligner(str(layout.genome_fasta(s.id)), preset=cfg.get("preset", "map-ont"), n_threads=threads)
+        fasta = reference_fasta(layout, s.id, reference)
+        aligner = mappy.Aligner(str(fasta), preset=cfg.get("preset", "map-ont"), n_threads=threads)
         if not aligner:
             raise RuntimeError(f"minimap2 failed to build an index for {s.name}")
 
@@ -70,7 +100,7 @@ def map_split(panel: Panel, exp, layout: Layout, split: str) -> pd.DataFrame:
                 for i, mlen, blen, qcov in res:
                     if mlen > best_mlen[i]:
                         best_mlen[i], best_blen[i], best_qcov[i], best_sp[i] = mlen, blen, qcov, s.id
-        print(f"[minimap2] {split}: mapped against {s.name} in {time.time() - t0:.0f} s")
+        print(f"[minimap2:{reference}] {split}: mapped against {s.name} in {time.time() - t0:.0f} s", flush=True)
         del aligner
     sim = best_mlen / np.maximum(lengths, 1)
     hits = pd.DataFrame({
@@ -79,8 +109,8 @@ def map_split(panel: Panel, exp, layout: Layout, split: str) -> pd.DataFrame:
         "identity": np.where(best_blen > 0, best_mlen / np.maximum(best_blen, 1), 0.0),
         "query_coverage": best_qcov, "similarity": np.clip(sim, 0, 1),
     })
-    hits.to_csv(layout.minimap_hits(split), sep="\t", index=False)
-    print(f"[minimap2] {split}: {hits.mapped.mean():.1%} of reads mapped")
+    hits.to_csv(layout.minimap_hits(split, reference), sep="\t", index=False)
+    print(f"[minimap2:{reference}] {split}: {hits.mapped.mean():.1%} of reads mapped", flush=True)
     return hits
 
 

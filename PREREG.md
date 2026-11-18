@@ -37,6 +37,7 @@ alignment baseline (minimap2) and an alignment-free composition baseline (k-mers
 | `kmer_head` | canonical 5-mer frequencies | contrastive head (ablation: same head, no language model) |
 | `kmer_raw` | canonical 5-mer frequencies | none |
 | `minimap2` | best alignment of each read to every panel genome (full genomes, test regions included) | none |
+| `minimap2_train` | best alignment to the training blocks of every panel genome only, the same sequence the learned methods saw (reference row, no hypothesis; see development log) | none |
 
 Contrastive head: supervised contrastive loss at species level plus genus (weight 0.5) and family
 (weight 0.25) terms, trained on panel species' training-region reads only. The checkpoint with the
@@ -113,6 +114,12 @@ Changes made on validation before the lock, kept here so they are visible next t
   step), backbone learning rate 1e-4, everything else unchanged. Added logging of skipped fp16 updates,
   encoder gradient norm and how far the weights move. Whatever attempt 2 gives is the `plantcad_ft2_head`
   result; there is no attempt 3 before the test.
+- **`minimap2_train` added (18 Nov 2026), after seeing the validation table.** `minimap2` indexes the full
+  panel genomes, so a known species' validation and test reads align to the exact sequence they came
+  from; H6 and section 8 already said this favours it. `minimap2_train` indexes only the training blocks,
+  matching what the learned methods saw. It is a reference row with no hypothesis and cannot change
+  any H1-H6 outcome. Both rows are reported: `minimap2` for "a reference genome exists", `minimap2_train`
+  for "like-for-like with the learned methods".
 
 ## 10. Deviations
 

@@ -128,3 +128,12 @@ def test_prereg_freeze_and_guards(tmp_path, panel):
         check_lock(root, layout)
     with pytest.raises(PreregError, match="already exists"):
         freeze(root, layout, panel, None)
+
+
+def test_minimap_method_names_map_to_references():
+    from prp.minimap import method_reference
+
+    assert method_reference("minimap2") == "full"
+    assert method_reference("minimap2_train") == "train"
+    assert method_reference("minimap2_other") is None
+    assert method_reference("kmer_head") is None

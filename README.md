@@ -28,7 +28,7 @@ flowchart LR
   C --> D[512 bp windows]
   D --> E1[PlantCaduceus<br/>strand-averaged]
   D --> E2[canonical k-mers]
-  C --> M[minimap2<br/>full panel genomes]
+  C --> M[minimap2<br/>full panel genomes, and training blocks only]
   E1 --> F[contrastive head<br/>species + genus + family]
   E2 --> F
   F --> G[prototypes per panel species]
@@ -49,7 +49,7 @@ flowchart LR
 | Strand of a read changing its embedding | k-mers are canonicalised; PlantCaduceus's forward and reverse-complement channels are aligned and averaged. Both are unit-tested for exact reverse-complement invariance. |
 | Thresholds or models tuned on the test set | Thresholds, model selection and targets use validation species only. `prp freeze` hashes PREREG.md, configs, thresholds and weights; `prp evaluate --split test` refuses to run without the lock, refuses if a frozen file changed, and logs any re-run as a deviation. |
 | Over-confident intervals | Specimens from one species are correlated, so 95% intervals resample *species* within each truth class. |
-| A weak baseline | minimap2 indexes the *full* genome of every panel species, test regions included, which favours it on known species. That is realistic for a reference database and stated in advance. |
+| A weak baseline | `minimap2` indexes the *full* genome of every panel species, test regions included, which favours it on known species; that is realistic for a reference database and stated in advance. `minimap2_train` indexes only the training blocks, like-for-like with the learned methods. Both are reported. |
 | "Likely new" judged leniently | A call is correct only end to end: known needs the right species, relative needs the right genus. |
 
 Two things about the model shape the experiment. PlantCaduceus was pre-trained mostly on gene
@@ -75,7 +75,8 @@ PlantCAD2 (8,192 bp context) is a drop-in option in `configs/experiment.yaml`.
 
 `plantcad_head` (primary), `plantcad_ft2_head` (backbone adapted on noisy windows; attempt 1,
 `plantcad_ft_head`, did not adapt and is kept as a record), `plantcad_raw`,
-`kmer_head`, `kmer_raw` and `minimap2`, all through the same specimen builder, decision rule and
+`kmer_head`, `kmer_raw`, `minimap2` (full panel genomes) and `minimap2_train` (training blocks only, like-for-like
+with the learned methods), all through the same specimen builder, decision rule and
 calibration. Specimens of 1, 10 and 50 reads. Full definitions in [PREREG.md](PREREG.md).
 
 ## Quick start

@@ -56,8 +56,9 @@ class Layout:
     def scores(self, method: str, split: str, n: int) -> Path:
         return self._d("scores", method) / f"{split}.n{n}.tsv"
 
-    def minimap_hits(self, split: str) -> Path:
-        return self._d("baselines", "minimap2") / f"{split}.hits.tsv"
+    def minimap_hits(self, split: str, reference: str = "full") -> Path:
+        name = "minimap2" if reference == "full" else f"minimap2_{reference}"
+        return self._d("baselines", name) / f"{split}.hits.tsv"
 
     def calibration(self, method: str) -> Path:
         return self._d("calibration") / f"{method}.json"
