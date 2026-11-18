@@ -82,7 +82,7 @@ calibration. Specimens of 1, 10 and 50 reads. Full definitions in [PREREG.md](PR
 ```bash
 pip install torch --index-url https://download.pytorch.org/whl/cpu
 pip install -e ".[dev]" && pip install git+https://github.com/rrwick/Badread.git
-pytest                                    # 34 tests, about a minute
+pytest                                    # 0 tests, about a minute
 prp toy --out toy && cd toy && prp run-toy --panel configs/panel.yaml --config configs/experiment.yaml
 ```
 
