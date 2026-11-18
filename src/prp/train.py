@@ -147,8 +147,9 @@ def finetune_encoder(layout: Layout, exp, encoder_name: str, out_name: str) -> d
     fa, _ = _codes(rk.family)
     rng = np.random.default_rng(exp.seed)
     W = int(cfg["windows_per_read"])
+    W_MON = int(cfg.get("monitor_windows", 4))  # windows per read when monitoring (closer to final embedding)
 
-    def sample_windows(reads: pd.DataFrame, rows: np.ndarray, win: np.ndarray) -> torch.Tensor:
+    def sample_windows(reads: pd.DataFrame, rows: np.ndarray, win: np.ndarray, W: int) -> torch.Tensor:
         out = []
         for r in rows:
             first, nw = int(reads.first_window.iloc[r]), int(reads.n_windows.iloc[r])
@@ -158,7 +159,7 @@ def finetune_encoder(layout: Layout, exp, encoder_name: str, out_name: str) -> d
 
     with torch.no_grad():
         enc.eval()
-        probe = enc(torch.from_numpy(tr_win[:256]))
+        probe = enc(torch.from_numpy(tr_win[:128]))
         enc.train()
     dim = probe.shape[1]
     head = ProjectionHead(dim, int(hcfg["hidden"]), int(hcfg["out_dim"]), float(hcfg["dropout"]),
@@ -188,7 +189,7 @@ def finetune_encoder(layout: Layout, exp, encoder_name: str, out_name: str) -> d
         with torch.no_grad():
             for r in rows:
                 first, nw = int(reads.first_window.iloc[r]), int(reads.n_windows.iloc[r])
-                e = enc(torch.from_numpy(win[first : first + min(nw, W)])).mean(0, keepdim=True)
+                e = enc(torch.from_numpy(win[first : first + min(nw, W_MON)])).mean(0, keepdim=True)
                 outs.append(head(e).cpu().numpy())
         enc.train()
         head.train()
@@ -196,22 +197,50 @@ def finetune_encoder(layout: Layout, exp, encoder_name: str, out_name: str) -> d
 
     steps = int(cfg["steps"])
     log, best = [], {"score": -1.0}
+    reductions: list[dict] = []
     t0 = time.time()
-    for step in range(steps):
+    step = 0
+    while step < steps:
         for g in opt.param_groups:
             g["lr"] = _cosine_lr(step, steps, g["base"])
-        rows = sampler()
-        x = sample_windows(rk, rows, tr_win)
-        e = enc(x)
-        e = e.view(len(rows), W, -1).mean(1)
-        z = head(e)
-        idx = torch.from_numpy(rows).to(device)
-        loss, parts = hierarchical_supcon(z, t_sp[idx], t_ge[idx], t_fa[idx], float(hcfg["temperature"]),
-                                          float(hcfg["lambda_genus"]), float(hcfg["lambda_family"]))
-        opt.zero_grad()
-        scaler.scale(loss).backward()
-        scaler.step(opt)
-        scaler.update()
+        oom = False
+        try:
+            rows = sampler()
+            x = sample_windows(rk, rows, tr_win, W)
+            e = enc(x)
+            e = e.view(len(rows), W, -1).mean(1)
+            z = head(e)
+            idx = torch.from_numpy(rows).to(device)
+            loss, parts = hierarchical_supcon(z, t_sp[idx], t_ge[idx], t_fa[idx], float(hcfg["temperature"]),
+                                              float(hcfg["lambda_genus"]), float(hcfg["lambda_family"]))
+            opt.zero_grad(set_to_none=True)
+            scaler.scale(loss).backward()
+            scaler.step(opt)
+            scaler.update()
+        except torch.OutOfMemoryError:
+            if step > 0:
+                raise
+            oom = True
+        if oom:
+            # Only the first step may shrink the batch, and every shrink is logged: never a silent change.
+            opt.zero_grad(set_to_none=True)
+            if device.type == "cuda":
+                torch.cuda.empty_cache()
+            before = {"reads_per_species": sampler.K, "windows_per_read": W}
+            if sampler.K > 1:
+                sampler.K //= 2
+            elif W > 1:
+                W //= 2
+            else:
+                raise RuntimeError("out of GPU memory even at one window per read; lower species_per_batch")
+            change = {"from": before, "to": {"reads_per_species": sampler.K, "windows_per_read": W}}
+            reductions.append(change)
+            print(f"[finetune] out of GPU memory on the first step; batch reduced {change}", flush=True)
+            continue
+        if step == 0:
+            peak = torch.cuda.max_memory_allocated() / 2**30 if device.type == "cuda" else 0.0
+            print(f"[finetune] first step OK: {len(rows)} reads x {W} windows per step, "
+                  f"peak GPU memory {peak:.1f} GiB", flush=True)
         if (step + 1) % int(cfg["eval_every"]) == 0 or step == steps - 1:
             m = monitor(embed_reads(tr_reads, mon_tr, tr_win), tr_reads.iloc[mon_tr].reset_index(drop=True),
                         embed_reads(va_reads, mon_va, va_win), va_reads.iloc[mon_va].reset_index(drop=True))
@@ -225,8 +254,10 @@ def finetune_encoder(layout: Layout, exp, encoder_name: str, out_name: str) -> d
                 state = {k: v.detach().cpu() for k, v in enc.state_dict().items() if k in trainable}
                 torch.save({"encoder": state, "encoder_name": encoder_name, "step": step + 1,
                             "trainable_regex": cfg.get("trainable_regex")}, layout.model_dir(out_name) / "encoder.pt")
+        step += 1
     summary = {"encoder": encoder_name, "out": out_name, "n_trainable": int(enc.n_trainable), "best": best,
-               "log": log, "config": cfg}
+               "log": log, "config": cfg, "batch_reductions": reductions,
+               "effective_batch": {"reads_per_species": sampler.K, "windows_per_read": W}}
     (layout.model_dir(out_name) / "finetune_log.json").write_text(json.dumps(summary, indent=2))
     print(f"[finetune] {out_name}: best step {best.get('step')} score {best['score']:.3f}; "
           f"{enc.n_trainable:,} trainable encoder parameters")

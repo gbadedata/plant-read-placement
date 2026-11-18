@@ -244,3 +244,39 @@ def test_gpu_check_on_fake_model(rng):
     lr = layer_report(names, [r"layers\.(1[6-9])\.", "norm_f"])
     assert lr["n_layers"] == 20 and lr["matched_tensors"] == 5
     assert lr["suggested_patterns"] == [r"layers\.(16|17|18|19)\.", "norm_f"]
+
+
+def test_finetune_shrinks_batch_on_first_step_oom(tmp_path, monkeypatch):
+    """Simulate a GPU that only fits 8 windows per step: the run must shrink the batch, log it, and finish."""
+    import json
+
+    import yaml
+
+    from prp.cli import main
+    from prp.encoders import ToyCNNEncoder
+    from prp.toy import make_toy
+
+    out = make_toy(tmp_path / "toy", genome_len=40_000)
+    cfg_path = out / "configs" / "experiment.yaml"
+    cfg = yaml.safe_load(cfg_path.read_text())
+    cfg["simulate"]["reads"] = {"train": 20, "val": 10, "test": 10}
+    cfg["finetune"].update({"steps": 3, "eval_every": 3, "reads_per_species": 4, "windows_per_read": 2})
+    cfg_path.write_text(yaml.safe_dump(cfg))
+    monkeypatch.chdir(out)
+    base = ["--panel", "configs/panel.yaml", "--config", "configs/experiment.yaml"]
+    for step in (["resolve"], ["fetch"], ["split"], ["simulate", "--workers", "1"], ["windows"]):
+        main(step + base)
+    real_forward = ToyCNNEncoder.forward
+
+    def small_gpu(self, windows):
+        if self.training and windows.shape[0] > 8:
+            raise torch.OutOfMemoryError("simulated")
+        return real_forward(self, windows)
+
+    monkeypatch.setattr(ToyCNNEncoder, "forward", small_gpu)
+    main(["finetune", "--encoder", "toycnn", "--name", "ft"] + base)
+    log = json.loads((out / "work" / "models" / "ft" / "finetune_log.json").read_text())
+    assert log["batch_reductions"], "expected the batch to be reduced"
+    eff = log["effective_batch"]
+    assert 6 * eff["reads_per_species"] * eff["windows_per_read"] <= 8  # six training species in the toy set
+    assert (out / "work" / "models" / "ft" / "encoder.pt").exists()

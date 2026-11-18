@@ -59,10 +59,16 @@ finetune:
   # and caduceus.backbone.norm_f (modeling_caduceus.py); 16-19 assumes the 20-layer l20 model.
   # `prp gpu-check` prints the real layer count and a suggested pattern if this does not match.
   trainable_regex: ["layers\\.(1[6-9])\\.", "norm_f"]
-  windows_per_read: 4
+  # Memory: each trainable block runs Mamba four times (two directions x two strands) and keeps its
+  # activations for the backward pass, about 85 MB per 512 bp window across four blocks. A 16 GB T4
+  # ran out at 208 windows per step (13 species x 4 reads x 4 windows), so: 4 reads x 1 window per
+  # species (52 windows, about 5 GB) and more steps. If the first step still runs out of memory the
+  # run halves the batch and records it in finetune_log.json.
+  windows_per_read: 1
+  monitor_windows: 4
   species_per_batch: 0
   reads_per_species: 4
-  steps: 2000
+  steps: 3000
   lr_backbone: 2.0e-5
   lr_head: 1.0e-3
   eval_every: 250

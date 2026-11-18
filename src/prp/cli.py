@@ -429,9 +429,13 @@ def build_parser() -> argparse.ArgumentParser:
 
 
 def main(argv=None):
+    import os
+
     from .config import ConfigError
     from .prereg import PreregError
 
+    # Lets PyTorch reuse fragmented GPU memory (the T4 fine-tune ran out with 1 GiB reserved but unused).
+    os.environ.setdefault("PYTORCH_CUDA_ALLOC_CONF", "expandable_segments:True")
     args = build_parser().parse_args(argv)
     np.set_printoptions(precision=4, suppress=True)
     try:

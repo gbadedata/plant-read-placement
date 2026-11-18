@@ -174,8 +174,8 @@ DEFAULT_EXPERIMENT: dict[str, Any] = {
         "steps": 3000, "lr": 1.0e-3, "weight_decay": 1.0e-4, "eval_every": 250, "device": "auto",
     },
     "finetune": {
-        "encoder": "plantcad", "trainable_regex": [], "windows_per_read": 4,
-        "species_per_batch": 0, "reads_per_species": 4, "steps": 2000,
+        "encoder": "plantcad", "trainable_regex": [], "windows_per_read": 1, "monitor_windows": 4,
+        "species_per_batch": 0, "reads_per_species": 4, "steps": 3000,
         "lr_backbone": 2.0e-5, "lr_head": 1.0e-3, "eval_every": 250,
     },
     "evaluation": {
