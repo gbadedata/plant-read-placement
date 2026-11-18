@@ -169,6 +169,9 @@ def finetune_encoder(layout: Layout, exp, encoder_name: str, out_name: str) -> d
                             weight_decay=float(hcfg["weight_decay"]))
     sampler = BalancedSampler(sp, int(cfg["species_per_batch"]), int(cfg["reads_per_species"]), exp.seed)
     t_sp, t_ge, t_fa = (torch.from_numpy(a).to(device) for a in (sp, ge, fa))
+    # fp16 autocast (e.g. on a T4, which has no bf16) needs loss scaling so small gradients do not underflow
+    use_scaler = getattr(enc, "amp", "none") == "fp16" and device.type == "cuda"
+    scaler = torch.amp.GradScaler("cuda", enabled=use_scaler)
 
     # small fixed monitoring subsets (full validation embedding happens later with `prp embed`)
     def subset(reads: pd.DataFrame, per_sp: int) -> np.ndarray:
@@ -206,8 +209,9 @@ def finetune_encoder(layout: Layout, exp, encoder_name: str, out_name: str) -> d
         loss, parts = hierarchical_supcon(z, t_sp[idx], t_ge[idx], t_fa[idx], float(hcfg["temperature"]),
                                           float(hcfg["lambda_genus"]), float(hcfg["lambda_family"]))
         opt.zero_grad()
-        loss.backward()
-        opt.step()
+        scaler.scale(loss).backward()
+        scaler.step(opt)
+        scaler.update()
         if (step + 1) % int(cfg["eval_every"]) == 0 or step == steps - 1:
             m = monitor(embed_reads(tr_reads, mon_tr, tr_win), tr_reads.iloc[mon_tr].reset_index(drop=True),
                         embed_reads(va_reads, mon_va, va_win), va_reads.iloc[mon_va].reset_index(drop=True))

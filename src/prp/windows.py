@@ -63,7 +63,7 @@ def build_windows(panel: Panel, exp: Experiment, layout: Layout, splits=("train"
             continue
         arr = np.concatenate(wins).astype(np.uint8)
         read_index = np.repeat(np.arange(len(rows), dtype=np.int32), [r["n_windows"] for r in rows])
-        np.savez(layout.windows(split), windows=arr, read_index=read_index)
+        np.savez_compressed(layout.windows(split), windows=arr, read_index=read_index)
         with open(layout.read_table(split), "w", newline="") as fh:
             w = csv.DictWriter(fh, fieldnames=READ_COLUMNS, delimiter="\t")
             w.writeheader()

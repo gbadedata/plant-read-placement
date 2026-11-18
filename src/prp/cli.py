@@ -129,11 +129,13 @@ def cmd_embed(args):
     from .encoders import make_encoder
 
     panel, exp, layout = _ctx(args)
+    if args.amp:
+        exp.raw["encoders"][args.encoder]["amp"] = args.amp
     enc = make_encoder(args.encoder, exp, checkpoint=args.checkpoint)
     name = args.name or (args.encoder + ("_ft" if args.checkpoint else ""))
     bs = args.batch_size or int(exp["encoders"][args.encoder].get("batch_size", 256))
     meta = {"encoder": args.encoder, "checkpoint": args.checkpoint,
-            "model": exp["encoders"][args.encoder].get("model")}
+            "model": exp["encoders"][args.encoder].get("model"), "amp": exp["encoders"][args.encoder].get("amp")}
     for split in args.splits:
         embed_split(enc, layout, split, name, batch_size=bs, meta=meta)
 
@@ -149,7 +151,10 @@ def cmd_finetune(args):
     from .train import finetune_encoder
 
     panel, exp, layout = _ctx(args)
-    finetune_encoder(layout, exp, args.encoder or exp["finetune"]["encoder"], args.name)
+    name = args.encoder or exp["finetune"]["encoder"]
+    if args.amp:
+        exp.raw["encoders"][name]["amp"] = args.amp
+    finetune_encoder(layout, exp, name, args.name)
 
 
 def cmd_minimap(args):
@@ -242,6 +247,31 @@ def cmd_report(args):
     print(write_report(layout, args.split, title="Plant read placement"))
 
 
+def cmd_gpu_check(args):
+    from .encoders import make_encoder
+    from .gpucheck import run_check, save
+    from .windows import load_windows
+
+    panel, exp, layout = _ctx(args)
+    cfg = exp["encoders"][args.encoder]
+    amp = args.amp or cfg.get("amp", "none")
+    wins, _ = load_windows(layout, args.split)
+    rng = np.random.default_rng(exp.seed)
+    sample = wins[rng.choice(len(wins), min(args.n, len(wins)), replace=False)]
+    total = 0
+    for split in ("train", "val", "test"):
+        if layout.windows(split).exists():
+            total += int(np.load(layout.windows(split))["read_index"].shape[0])
+    enc = make_encoder(args.encoder, exp)
+    report = run_check(enc, sample, amp, int(cfg.get("batch_size", 64)), total,
+                       list(exp["finetune"].get("trainable_regex") or []))
+    save(report, layout.root / "gpu_check.json")
+    print(json.dumps(report, indent=2))
+    if not report["ok"]:
+        sys.exit("gpu-check found problems: " + "; ".join(report["problems"]))
+    print(f"[gpu-check] OK: about {report['estimated_embed_minutes']} min to embed all windows once")
+
+
 def cmd_list_params(args):
     from .encoders import make_encoder
 
@@ -312,10 +342,12 @@ def build_parser() -> argparse.ArgumentParser:
     e.add_argument("--checkpoint")
     e.add_argument("--batch-size", type=int)
     e.add_argument("--splits", nargs="+", default=["train", "val", "test"])
+    e.add_argument("--amp", choices=["none", "fp16", "bf16"], help="override encoders.<name>.amp")
     add("train-head", cmd_train_head, "train the contrastive head").add_argument("--features", required=True)
     f = add("finetune", cmd_finetune, "adapt encoder layers on noisy reads")
     f.add_argument("--encoder")
     f.add_argument("--name", required=True)
+    f.add_argument("--amp", choices=["none", "fp16", "bf16"], help="override encoders.<name>.amp")
     add("minimap", cmd_minimap, "minimap2 baseline").add_argument("--splits", nargs="+", default=["val"])
     add("dev", cmd_dev, "score + calibrate + evaluate on validation").add_argument("--methods", nargs="+", required=True)
     add("freeze", cmd_freeze, "freeze the preregistration")
@@ -325,6 +357,11 @@ def build_parser() -> argparse.ArgumentParser:
     ev.add_argument("--rerun-reason")
     add("report", cmd_report, "write RESULTS.md and figures").add_argument("--split", choices=["val", "test"], default="val")
     add("list-params", cmd_list_params, "print encoder parameter names").add_argument("--encoder", required=True)
+    g = add("gpu-check", cmd_gpu_check, "five-minute pre-flight on the GPU machine")
+    g.add_argument("--encoder", default="plantcad")
+    g.add_argument("--split", default="val")
+    g.add_argument("--n", type=int, default=128)
+    g.add_argument("--amp", choices=["none", "fp16", "bf16"])
     add("run-toy", cmd_run_toy, "run every stage on the toy data set")
     return p
 

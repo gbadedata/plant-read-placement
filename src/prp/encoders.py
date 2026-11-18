@@ -73,17 +73,20 @@ class KmerEncoder:
 # --------------------------------------------------------------------------- PlantCaduceus
 
 def combine_strands(hidden: torch.Tensor, rc_equivariant: bool) -> torch.Tensor:
-    """(B, T, C) hidden states -> (B, T, H).
+    """(B, T, C) hidden states -> (B, T, H), averaged over the two strands position by position.
 
-    Caduceus (RC-equivariant, "rcps") models emit 2H channels: the first H are the forward strand,
-    the second H the reverse-complement strand in reversed position order. Following the PlantCAD
-    README, flip the RC half along the sequence axis and average the two.
+    Caduceus RCPS models emit 2H channels. The second half is the reverse-complement stream stored
+    flipped along BOTH sequence and channel axes (modeling_caduceus.py:
+    `torch.cat([fwd, rc.flip(dims=[-2, -1])], -1)`), so it is already aligned to forward positions
+    and only its channel order is reversed. Flip channels and average, exactly as the PlantCaduceus
+    example notebook does (`reverse[..., ::-1]`). This makes the pooled embedding of a window equal
+    to that of its reverse complement.
     """
     if not rc_equivariant:
         return hidden
     H = hidden.shape[-1] // 2
     fwd = hidden[..., :H]
-    rc = torch.flip(hidden[..., H:], dims=[1])
+    rc = torch.flip(hidden[..., H:], dims=[-1])
     return (fwd + rc) / 2
 
 

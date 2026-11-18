@@ -82,13 +82,15 @@ calibration. Specimens of 1, 10 and 50 reads. Full definitions in [PREREG.md](PR
 ```bash
 pip install torch --index-url https://download.pytorch.org/whl/cpu
 pip install -e ".[dev]" && pip install git+https://github.com/rrwick/Badread.git
-pytest                                    # 32 tests, about a minute
+pytest                                    # 34 tests, about a minute
 prp toy --out toy && cd toy && prp run-toy --panel configs/panel.yaml --config configs/experiment.yaml
 ```
 
 The toy run exercises every stage, freeze and the locked test run on synthetic genomes. Its numbers
-mean nothing about real plants. The real run, including GPU setup, is in
-[docs/RUNBOOK.md](docs/RUNBOOK.md).
+mean nothing about real plants. The real run is in [docs/RUNBOOK.md](docs/RUNBOOK.md): CPU stages on
+any Linux machine, and the PlantCaduceus steps in a free Kaggle GPU notebook
+([kaggle/plantcad_gpu.ipynb](kaggle/plantcad_gpu.ipynb)) that rebuilds the authors' pinned environment
+and runs a pre-flight check (`prp gpu-check`) before anything long.
 
 ## Results
 
@@ -109,7 +111,9 @@ not attempted here.
 configs/      panel.yaml (species, roles), experiment.yaml (every setting)
 src/prp/      genomes, regions, simulate, windows, encoders, embed, losses, heads, train,
               placement, minimap, metrics, prereg, report, toy, cli
-tests/        unit tests (including a fake Caduceus model) + full toy pipeline
+tests/        unit tests (including a fake model with Caduceus's exact output layout) + full toy pipeline
+kaggle/       GPU notebook for the PlantCaduceus steps
+scripts/      environment setup (laptop, GPU, Kaggle) and upload packing
 docs/         RUNBOOK.md
 PREREG.md     hypotheses and targets, frozen before the test run
 ```

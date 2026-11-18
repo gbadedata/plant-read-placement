@@ -31,7 +31,7 @@ encoders:
     type: plantcad
     model: kuleshov-group/PlantCaduceus_l20   # 20M parameters; try _l32 (225M) if time allows
     batch_size: 64
-    amp: bf16                                  # use fp16 on GPUs without bf16 (e.g. T4), none for fp32
+    amp: fp16      # Kaggle/Colab T4 has no bf16; `prp gpu-check` refuses fp16 if it disagrees with fp32 (then use none)
     device: cuda
   # PlantCAD2 accepts up to 8,192 bp, which suits long reads. Check the exact Hugging Face model id on
   # https://github.com/plantcad/plantcad before enabling, and raise windows.size if you use it.
@@ -55,8 +55,9 @@ head:
 
 finetune:
   encoder: plantcad
-  # Unfreeze the top blocks of the backbone. Run `prp list-params --encoder plantcad` on the GPU machine
-  # and adjust these patterns to the printed names before fine-tuning (the run stops if nothing matches).
+  # Unfreeze the top four blocks and the final norm. Caduceus names them caduceus.backbone.layers.<i>
+  # and caduceus.backbone.norm_f (modeling_caduceus.py); 16-19 assumes the 20-layer l20 model.
+  # `prp gpu-check` prints the real layer count and a suggested pattern if this does not match.
   trainable_regex: ["layers\\.(1[6-9])\\.", "norm_f"]
   windows_per_read: 4
   species_per_batch: 0

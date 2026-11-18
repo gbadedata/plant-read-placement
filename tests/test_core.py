@@ -123,10 +123,10 @@ def test_kmer_strand_invariant_and_normalised(rng):
     assert np.allclose(a.sum(1), 1.0)
 
 
-def test_combine_strands_aligns_rc_half():
-    f = torch.randn(2, 5, 3)
-    h = torch.cat([f, torch.flip(f, dims=[1])], dim=-1)  # RC half stored in reversed order
-    assert torch.allclose(combine_strands(h, True), f)
+def test_combine_strands_flips_channels_not_positions():
+    f, g = torch.randn(2, 5, 3), torch.randn(2, 5, 3)
+    h = torch.cat([f, torch.flip(g, dims=[-1])], dim=-1)  # RC half stored channel-reversed, position-aligned
+    assert torch.allclose(combine_strands(h, True), (f + g) / 2)
     assert combine_strands(h, False).shape[-1] == 6
 
 
@@ -206,3 +206,18 @@ def test_badread_wrapper_real(tmp_path, rng):
     assert len(reads) >= 20
     idents = [parse_identity(d) for d, _, _ in reads if not is_artifact(d)]
     assert 0.85 < np.nanmean(idents) < 0.97
+
+
+def test_gpu_check_on_fake_model(rng):
+    from prp.gpucheck import layer_report, run_check
+
+    enc = PlantCADEncoder("fake", device="cpu", amp="none", components=(FakeTokenizer(), FakeRCPSModel(6)))
+    sample = rng.integers(0, 4, (16, 512)).astype(np.uint8)
+    rep = run_check(enc, sample, "none", 8, 1000, [r"^backbone\."])
+    assert rep["ok"] and rep["strand_invariance_min_cos"] > 0.999 and rep["layers"]["matched_tensors"] == 2
+    bad = run_check(enc, sample, "none", 8, 1000, ["no_such_layer"])
+    assert not bad["ok"] and "matches nothing" in bad["problems"][0]
+    names = [f"caduceus.backbone.layers.{i}.mixer.in_proj.weight" for i in range(20)] + ["caduceus.backbone.norm_f.weight"]
+    lr = layer_report(names, [r"layers\.(1[6-9])\.", "norm_f"])
+    assert lr["n_layers"] == 20 and lr["matched_tensors"] == 5
+    assert lr["suggested_patterns"] == [r"layers\.(16|17|18|19)\.", "norm_f"]

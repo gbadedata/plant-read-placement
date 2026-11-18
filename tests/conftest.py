@@ -52,7 +52,8 @@ class _Out:
 
 
 class FakeRCPSModel(nn.Module):
-    """Mimics the Caduceus output layout: channels [forward | reverse-complement in reversed order]."""
+    """Copies the Caduceus RCPS output layout (modeling_caduceus.py): channels are
+    [forward stream | reverse-complement stream flipped along sequence AND channel axes]."""
 
     def __init__(self, H: int = 6):
         super().__init__()
@@ -67,5 +68,5 @@ class FakeRCPSModel(nn.Module):
     def forward(self, input_ids, output_hidden_states=True):
         fwd = self.backbone(self.emb(input_ids))
         rc_ids = self.comp[torch.flip(input_ids, dims=[1])]
-        rc = self.backbone(self.emb(rc_ids))  # RC stream, in its own (reversed) order
-        return _Out([torch.cat([fwd, rc], dim=-1)])
+        rc_stream = self.backbone(self.emb(rc_ids))  # RC stream, in its own coordinates
+        return _Out([torch.cat([fwd, rc_stream.flip(dims=[-2, -1])], dim=-1)])

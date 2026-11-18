@@ -1,103 +1,104 @@
 # Runbook
 
-The fastest route is to run the CPU stages (downloads, simulation, minimap2) on any machine with
-about 32 GB of RAM and 60 GB of free disk, then use a GPU machine only for PlantCaduceus. Everything
-can also run on one GPU VM.
+The CPU stages (downloads, read simulation, k-mers, minimap2) run on a laptop or any Linux machine.
+Only the PlantCaduceus steps need a GPU, about 2 to 4 hours in total, and the default route for
+those is a free Kaggle notebook (`kaggle/plantcad_gpu.ipynb`).
 
 ## 0. Machines
 
-**CPU stages:** your laptop (Ubuntu under WSL is fine) or any Linux VM with at least 4 cores and 32 GB RAM.
+**CPU stages:** Ubuntu (WSL on Windows is fine) with 4+ cores, 16+ GB RAM visible to Linux and about
+60 GB free disk. In WSL, work in the Linux home folder (`~/...`), not under `/mnt/c/...`, which is
+much slower for large files.
 
-**GPU stages:** one NVIDIA GPU, Ampere or newer (A10, L4, A100). PlantCaduceus's authors report speeds
-only on Ampere-class cards; a T4 may work with `amp: fp16` but is untested. On Azure:
+**GPU stages, in order of preference:**
+1. **Kaggle notebook (free).** GPU T4 x2, about 30 GPU hours a week, internet on (needs a verified
+   phone number). The notebook builds PlantCaduceus's own pinned environment and stops at a
+   pre-flight check before the long steps.
+2. **Google Colab (free).** Same notebook; T4 availability is not guaranteed.
+3. **Rented GPU or an Azure GPU VM.** Ampere or newer (A10, L4, A100); run the same commands as the
+   notebook after `bash scripts/setup_env.sh --gpu`. Azure needs a GPU quota request first.
 
-1. Portal → **Quotas → Compute** → your region → request vCPUs for an A10 or A100 family (for example
-   "Standard NVADSA10v5 Family" or "Standard NCADS_A100_v4 Family"). Approval can take days.
-2. Create the VM from an Ubuntu 22.04 image with the NVIDIA GPU driver extension (or the NVIDIA
-   GPU-optimised image), 128 GB OS disk. Check with `nvidia-smi`.
-3. **Stop (deallocate) the VM whenever it is idle.** You pay for a running GPU VM by the hour.
-
-## 1. Install
+## 1. Install (CPU machine)
 
 ```bash
-# conda (Miniforge) if you do not have it
-curl -L -o mf.sh https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-Linux-x86_64.sh
-bash mf.sh -b && source ~/miniforge3/bin/activate
+# conda inside Linux/WSL, if `conda --version` does not already work
+curl -L -o ~/mf.sh https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-Linux-x86_64.sh
+bash ~/mf.sh -b -p ~/miniforge3 && ~/miniforge3/bin/conda init bash && exec bash
 
-git clone https://github.com/gbadedata/plant-read-placement && cd plant-read-placement
-bash scripts/setup_env.sh          # CPU tools: package, Badread, NCBI Datasets CLI, minimap2 bindings
-bash scripts/setup_env.sh --gpu    # on the GPU machine: adds transformers, mamba-ssm, causal-conv1d
+cd ~ && git clone https://github.com/gbadedata/plant-read-placement && cd plant-read-placement
+bash scripts/setup_env.sh          # package, Badread, NCBI Datasets CLI, minimap2 bindings
 conda activate prp
 pytest                              # about a minute; includes the full toy pipeline
 ```
 
-The GPU install follows PlantCAD's own instructions (`mamba-ssm==2.2.4 causal-conv1d==1.5.0.post8
---no-build-isolation`). If `from mamba_ssm import Mamba` fails, reinstall mamba-ssm alone without
-causal-conv1d, as their troubleshooting section advises.
-
-## 2. One-minute toy check (any machine)
+## 2. One-minute toy check (optional)
 
 ```bash
 prp toy --out toy && cd toy && prp run-toy --panel configs/panel.yaml --config configs/experiment.yaml && cd ..
 ```
 
-This exercises every stage including freeze and the locked test run. Toy numbers mean nothing.
-
 ## 3. The real run
 
-Run long steps inside `tmux` so a dropped connection does not kill them.
+Run long steps inside `tmux` (`tmux new -s prp`; reattach with `tmux attach -t prp`).
 
 | # | command | where | rough time |
 |---|---|---|---|
-| 1 | `prp check-panel --strict` | CPU | seconds |
-| 2 | `prp resolve` then read `work/genomes/lock.json` | CPU | minutes |
-| 3 | `prp fetch` | CPU | 30-60 min (about 5 GB) |
-| 4 | `prp split` | CPU | 10-20 min |
-| 5 | `prp simulate --workers 4` | CPU | 1-3 h (Badread about 80 kb/s per worker) |
-| 6 | `prp windows` | CPU | 10 min |
-| 7 | `prp embed --encoder kmer` | CPU | 10-20 min |
-| 8 | `prp minimap --splits val test` | CPU | 30-60 min |
-| 9 | copy `configs/` and `work/windows/` to the GPU machine | | |
-| 10 | `prp embed --encoder plantcad` | GPU | 30-90 min |
-| 11 | `prp list-params --encoder plantcad`, then set `finetune.trainable_regex` | GPU | minutes |
-| 12 | `prp finetune --name plantcad_adapted` | GPU | 30-90 min |
-| 13 | `prp embed --encoder plantcad --checkpoint work/models/plantcad_adapted/encoder.pt --name plantcad_ft` | GPU | 30-90 min |
-| 14 | copy `work/features/` and `work/models/` back | | |
-| 15 | `prp train-head --features kmer`, `... plantcad`, `... plantcad_ft` | GPU or CPU | 5-15 min each |
-| 16 | `prp dev --methods kmer_raw kmer_head plantcad_raw plantcad_head plantcad_ft_head minimap2` | CPU | 10 min |
-| 17 | fill every `TBD` in `PREREG.md` from `work/results/val/RESULTS.md`; commit and push | | |
-| 18 | `prp freeze`; commit `prereg.lock.json`; push | CPU | seconds |
-| 19 | `prp evaluate --split test --methods <same list>` | CPU | 10 min |
-| 20 | copy `work/results/test/` to `results/`; commit `TEST_RUN.json` and results; push | | |
+| 1 | `prp check-panel --strict` | laptop | seconds |
+| 2 | `prp resolve`, then review `work/genomes/lock.json` | laptop | minutes |
+| 3 | `prp fetch` | laptop | 30-60 min (about 5 GB) |
+| 4 | `prp split` | laptop | 10-20 min |
+| 5 | `prp simulate --workers 3` | laptop | 2-4 h (Badread is slow; run overnight) |
+| 6 | `prp windows` | laptop | 10 min |
+| 7 | `bash scripts/pack_for_kaggle.sh` and upload `prp_windows.zip` as a **private** Kaggle dataset | laptop / browser | 10 min |
+| 8 | `prp embed --encoder kmer` and `prp minimap --splits val test` | laptop, while Kaggle runs | 1-2 h |
+| 9 | Kaggle notebook cells 1-5: setup and `gpu-check` | Kaggle | 15 min |
+| 10 | Kaggle notebook cells 6-10: embed, fine-tune, re-embed, heads, pack | Kaggle | 2-4 h |
+| 11 | download `gpu_outputs.zip`; `cd work && python -m zipfile -e /mnt/c/Users/<you>/Downloads/gpu_outputs.zip .` | laptop | minutes |
+| 12 | `prp train-head --features kmer` | laptop | 5-10 min |
+| 13 | `prp dev --methods kmer_raw kmer_head plantcad_raw plantcad_head plantcad_ft_head minimap2` | laptop | 10 min |
+| 14 | fill every `TBD` in `PREREG.md` from `work/results/val/RESULTS.md`; commit and push | laptop | |
+| 15 | `prp freeze`; commit `prereg.lock.json`; push | laptop | seconds |
+| 16 | `prp evaluate --split test --methods <same list>` | laptop | 10 min |
+| 17 | copy `work/results/test/` to `results/`; commit `TEST_RUN.json` and results; push | laptop | |
 
-Pushing after steps 17 and 18 gives a public, timestamped record that the targets came before the
+Pushing after steps 14 and 15 leaves a public, timestamped record that the targets came before the
 test run.
+
+### Kaggle, step by step
+
+1. kaggle.com > **Create > New Dataset** > upload `prp_windows.zip` (Windows Explorer can open the WSL
+   path the packing script prints) > title `prp-windows` > **Private** > Create.
+2. kaggle.com > **Create > New Notebook** > **File > Import Notebook** > upload
+   `kaggle/plantcad_gpu.ipynb` from the repo.
+3. Right-hand panel: **Accelerator: GPU T4 x2**, **Internet: On**, **Add Input** > your `prp-windows` dataset.
+4. Run cells 1 to 5. Cell 5 (`gpu-check`) prints the GPU, the model's layer count, whether embeddings
+   are identical for a read and its reverse complement, whether fp16 agrees with fp32, and an
+   estimated time. It stops the notebook if anything is wrong.
+5. If it says OK, run the remaining cells, or use **Save Version > Save & Run All** so the run
+   continues with the browser closed (sessions are limited to about 12 hours; this run needs 2 to 4).
+6. Download `gpu_outputs.zip` from the notebook's **Output** panel.
 
 ### Notes per step
 
-- **2 resolve:** if a species prints `NO ASSEMBLY FOUND`, use the alternate given in its `note` in
-  `configs/panel.yaml`, or pin an accession with `accession: GCF_...`. Re-run `prp check-panel --strict`.
-- **5 simulate:** each Badread worker holds one split's region FASTA in memory (up to about 1 GB of
-  sequence); four workers is safe with 32 GB. `--backend builtin` is much faster but less realistic;
+- **resolve:** if a species prints `NO ASSEMBLY FOUND`, use the alternate given in its `note` in
+  `configs/panel.yaml`, or pin an accession with `accession: GCF_...`, then re-run `prp check-panel --strict`.
+- **simulate:** each Badread worker holds one region FASTA in memory (up to about 1 GB of sequence).
+  Three workers suit 16 GB visible to WSL. `--backend builtin` is much faster but less realistic;
   if you use it, the write-up must say so.
-- **10 embed:** if you see out-of-memory errors, lower `encoders.plantcad.batch_size`. On a GPU
-  without bf16 (T4, V100) set `amp: fp16`.
-- **11 list-params:** pick the last four backbone blocks and the final norm. The default patterns
-  are a guess at Caduceus's names; the run stops with a list of names if nothing matches.
-- **16 dev:** this is the only place you look at numbers before freezing. Change anything you want
-  here (hyperparameters, steps, which methods), then re-run dev. Once you freeze, you stop.
-- **19 evaluate:** a second test run is refused unless you pass `--rerun-reason "..."`, which is
-  recorded as a deviation. Use it only for genuine bugs and say so in the write-up.
+- **gpu-check fails on fp16:** set `amp: none` under `encoders.plantcad` in `configs/experiment.yaml`
+  (slower, full precision) before the long steps, and commit the change.
+- **gpu-check fails on layer names:** copy its `suggested_patterns` into `finetune.trainable_regex`.
+- **dev:** the only place you look at numbers before freezing. Change anything here, then re-run dev.
+  Once you freeze, you stop.
+- **evaluate --split test:** a second test run is refused unless you pass `--rerun-reason "..."`,
+  which is recorded as a deviation.
 
 ## 4. If time is short
 
-Minimum credible run, in priority order:
-1. `plantcad_head`, `kmer_head`, `minimap2` with `specimen_sizes: [1, 10]`.
-2. Add `plantcad_ft_head` (the adaptation result).
-3. Add `plantcad_raw`, `kmer_raw` and n = 50.
-
-Reduce `simulate.reads` to `{train: 2000, val: 600, test: 600}` to halve simulation and embedding
-time. Make these changes before freezing.
+In priority order: `plantcad_head`, `kmer_head`, `minimap2` with `specimen_sizes: [1, 10]`; then add
+`plantcad_ft_head`; then `plantcad_raw`, `kmer_raw` and n = 50. Reducing `simulate.reads` to
+`{train: 2000, val: 600, test: 600}` roughly halves simulation and embedding time. Make these
+changes before freezing.
 
 ## 5. Troubleshooting
 
@@ -105,7 +106,7 @@ time. Make these changes before freezing.
 |---|---|
 | `datasets: command not found` | `conda install -c conda-forge ncbi-datasets-cli` |
 | `badread not on PATH` | `pip install git+https://github.com/rrwick/Badread.git` |
+| Kaggle setup cell runs for 20+ minutes | mamba-ssm is compiling from source; let it finish |
+| `No GPU visible` on Kaggle | Accelerator is set to None or P100; choose GPU T4 x2 and restart |
 | `cannot locate nucleotide tokens` | the tokenizer is not character-level; check the model id |
-| `trainable_regex matched no parameters` | run `prp list-params` and copy the real names |
 | `files changed since the preregistration was frozen` | you edited a frozen file; restore it from git |
-| PlantCaduceus very slow | confirm `torch.cuda.is_available()`; CPU inference is supported but much slower |
