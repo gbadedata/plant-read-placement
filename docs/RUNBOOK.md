@@ -56,6 +56,7 @@ Run long steps inside `tmux` (`tmux new -s prp`; reattach with `tmux attach -t p
 | 11 | download `gpu_outputs.zip`; `cd work && python -m zipfile -e /mnt/c/Users/<you>/Downloads/gpu_outputs.zip .` | laptop | minutes |
 | 12 | `prp train-head --features kmer` | laptop | 5-10 min |
 | 12b | fine-tune retry on Kaggle (cells 1-5, then 7-10 with `RUN_ATTEMPT_1_STEPS = False`); download `gpu_outputs_r2.zip`; `cd work && python -m zipfile -e /mnt/c/Users/<you>/Downloads/gpu_outputs_r2.zip .` | Kaggle / laptop | about 4 h |
+| 12b' | if the retry ran with attempt 1's notebook cells (names `plantcad_adapted`/`plantcad_ft`): `python scripts/import_retry.py <zip>` instead of unzipping; it renames the retry to `plantcad_adapted_r2`/`plantcad_ft2`, leaves attempt 1 untouched and checks the re-made frozen embeddings match | laptop | a minute |
 | 12c | `prp minimap --reference train --splits val test` (training-blocks-only index) | laptop | a few hours |
 | 13 | `prp dev --methods kmer_raw kmer_head plantcad_raw plantcad_head plantcad_ft_head plantcad_ft2_head minimap2 minimap2_train` | laptop | 10 min |
 | 13b | optional, exploratory: `prp explore --methods kmer_head plantcad_head plantcad_ft2_head minimap2 minimap2_train` (where each class goes and why) | laptop | seconds |
