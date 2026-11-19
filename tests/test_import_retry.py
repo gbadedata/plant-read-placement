@@ -81,3 +81,14 @@ def test_import_accepts_kaggle_download_all_layout(tmp_path):
     assert (work / "features" / "plantcad_ft2" / "val.npy").exists()
     assert (work / "models" / "plantcad_adapted_r2" / "finetune_log.json").exists()
     assert (work / "models" / "plantcad_ft2_head" / "head.pt").exists()
+
+
+def test_import_accepts_a_downloaded_folder(tmp_path):
+    archive = _zip(tmp_path / "all.zip", 3, 1e-4, {"val": np.ones((3, 4), dtype=np.float32)}, prefix="prp/work/")
+    folder = tmp_path / "kaggle_r2"
+    with zipfile.ZipFile(archive) as zf:
+        zf.extractall(folder)
+    work = tmp_path / "work"
+    _run(str(folder), "--work", str(work))
+    assert (work / "features" / "plantcad_ft2" / "val.npy").exists()
+    assert (work / "models" / "plantcad_ft2_head" / "train_log.json").exists()

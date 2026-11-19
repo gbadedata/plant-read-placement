@@ -17,7 +17,9 @@ straight into work/ would overwrite attempt 1's record. This script:
 Accepts either the notebook's own gpu_outputs.zip (files at the top) or Kaggle's "download all" archive
 of the Output tab (files under prp/work/ or similar): the prefix is found from the fine-tune log's path.
 
-Usage:  python scripts/import_retry.py /path/to/archive.zip [--work work]
+A folder works too (for example what `kaggle kernels output <user>/<notebook> -p <folder>` downloads).
+
+Usage:  python scripts/import_retry.py /path/to/archive.zip-or-folder [--work work]
 """
 
 from __future__ import annotations
@@ -42,6 +44,26 @@ EXPECTED = {"windows_per_read": 3, "lr_backbone": 1.0e-4}
 
 
 LOG = "models/plantcad_adapted/finetune_log.json"
+
+
+class FolderSource:
+    """The two zipfile.ZipFile methods this script uses, for a downloaded folder instead of a zip."""
+
+    def __init__(self, root: Path):
+        self.root = root
+        self._names = sorted(p.relative_to(root).as_posix() for p in root.rglob("*") if p.is_file())
+
+    def namelist(self) -> list[str]:
+        return self._names
+
+    def read(self, name: str) -> bytes:
+        return (self.root / name).read_bytes()
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *exc):
+        return False
 
 
 def find_prefix(zf: zipfile.ZipFile) -> str:
@@ -111,7 +133,8 @@ def main(argv=None) -> None:
     ap.add_argument("zip", type=Path)
     ap.add_argument("--work", type=Path, default=Path("work"))
     args = ap.parse_args(argv)
-    with zipfile.ZipFile(args.zip) as zf:
+    source = FolderSource(args.zip) if args.zip.is_dir() else zipfile.ZipFile(args.zip)
+    with source as zf:
         prefix = find_prefix(zf)
         log = check_attempt_2(zf, prefix)
         for new in RENAMES.values():
