@@ -1,0 +1,24 @@
+{
+  "frozen_at": "2026-11-19T02:14:29+00:00",
+  "git_commit": "9b25b4960729609c5e940b585f478108bfba4157",
+  "files": {
+    "PREREG.md": "26c2ba85e2260ea58490fa970554c85ef622d653b9735789ae3316c35b125c59",
+    "configs/panel.yaml": "681552c0e137d6b39ada5025409f0bb74ff3ad54009c1f56f77611da15579f97",
+    "configs/experiment.yaml": "c73dbe438373d37563acce919d3d27231d3039aa2e51654400f046f61ec60d07",
+    "work/calibration/kmer_head.json": "dc541499d16201f73cb1a7b3409215994d260cdce2f5f9b5e03875ae6240b489",
+    "work/calibration/kmer_raw.json": "bab93286f9bc773c594df3b6d70b6cf207ce75740bf6edda03907fa19339b83e",
+    "work/calibration/minimap2.json": "b19ede5f8c867c438be0fddff8b1a501f52411bd4b86b4dd776ff86935833280",
+    "work/calibration/minimap2_train.json": "8a80b8dfdd9f9ebb6500af544c10c757d487a227e2777ed9ae1c3e1891ba9810",
+    "work/calibration/plantcad_ft2_head.json": "0e852742301bc0384687c0c36e0a6a0e64db7bc51fb3775cc26feab140c69223",
+    "work/calibration/plantcad_ft_head.json": "5b3a5f6098f13d19688f0109b90ff63860938f1939a9e85b4736d6e03143859a",
+    "work/calibration/plantcad_head.json": "341ac66a4bc59ed1fa1182148ac00da3dec9aece97347e5c464f8ceac0543ee1",
+    "work/calibration/plantcad_raw.json": "1031b13827e9ce42440aa47cd3e8442912bc88c2467a59d8652b514ebb5dd52f",
+    "work/models/kmer_head/head.pt": "c95134e9e6257b9edd5aabf18486b1f89502c60616bd2eec26307a87361149b2",
+    "work/models/plantcad_ft2_head/head.pt": "0afbe7bd0eda4f3de9c1682e079ba6b3d67e22c3f9d8bfb3521af67d29e3547b",
+    "work/models/plantcad_ft_head/head.pt": "24956148dc6d9eb4f0cc90b8d331e8e6c73e555f4bd48244b3ea31172a666796",
+    "work/models/plantcad_head/head.pt": "f13d0dab0a76c6ce7c80c848f9402b94b34afdece4ca18dd1398e28e75c0488b",
+    "work/models/plantcad_adapted/encoder.pt": "61781b6363984d5350cd336125abbc7f72e1e19b7db0dc0758b76778f671fb5c",
+    "work/models/plantcad_adapted_r2/encoder.pt": "42dd629d1f0baa3945e6a0cc5be78646edfe095f4f47eb0c0a85c2cebb707350",
+    "work/genomes/lock.json": "8143f4b2f3a2e4014fcc786d0052cd61c8a69e51ba4220367238bdab05606bb3"
+  }
+}
