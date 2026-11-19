@@ -1,0 +1,2161 @@
+{
+  "split": "test",
+  "methods": {
+    "kmer_raw": {
+      "1": {
+        "n_specimens": 4400,
+        "balanced_accuracy": 0.33141666666666664,
+        "recall_known": 0.025,
+        "n_known": 2600,
+        "recall_relative": 0.01125,
+        "n_relative": 800,
+        "recall_new": 0.958,
+        "n_new": 1000,
+        "known_species_top1": 0.3465384615384615,
+        "relative_genus_top1": 0.2925,
+        "new_family_top1": 0.213,
+        "auroc_new_vs_rest": 0.6228899999999999,
+        "auroc_known_vs_rest": 0.5691870726495727,
+        "confusion": {
+          "known": {
+            "known": 118,
+            "relative": 135,
+            "new": 2347
+          },
+          "relative": {
+            "known": 41,
+            "relative": 29,
+            "new": 730
+          },
+          "new": {
+            "known": 23,
+            "relative": 19,
+            "new": 958
+          }
+        },
+        "balanced_accuracy_ci95": [
+          0.3142,
+          0.34549455128205125
+        ],
+        "auroc_new_vs_rest_ci95": [
+          0.5550048161764707,
+          0.6803325183823526
+        ],
+        "n_boot": 2000,
+        "species_per_class": {
+          "known": 13,
+          "relative": 4,
+          "new": 5
+        },
+        "by_read_identity": [
+          {
+            "bin": "[0, 0.88)",
+            "n": 439,
+            "balanced_accuracy": 0.3296023965141612,
+            "recall_known": 0.011029411764705883,
+            "recall_relative": 0.0,
+            "recall_new": 0.9777777777777777
+          },
+          {
+            "bin": "[0.88, 0.92)",
+            "n": 1495,
+            "balanced_accuracy": 0.3352601720204676,
+            "recall_known": 0.021714285714285714,
+            "recall_relative": 0.01845018450184502,
+            "recall_new": 0.9656160458452722
+          },
+          {
+            "bin": "[0.92, 0.96)",
+            "n": 2227,
+            "balanced_accuracy": 0.32886696395392045,
+            "recall_known": 0.028985507246376812,
+            "recall_relative": 0.009615384615384616,
+            "recall_new": 0.948
+          },
+          {
+            "bin": "[0.96, 1)",
+            "n": 239,
+            "balanced_accuracy": 0.33414146078657736,
+            "recall_known": 0.035211267605633804,
+            "recall_relative": 0.0,
+            "recall_new": 0.9672131147540983
+          }
+        ],
+        "by_read_length": [
+          {
+            "bin": "[0, 2000)",
+            "n": 366,
+            "balanced_accuracy": 0.33380875973138413,
+            "recall_known": 0.014084507042253521,
+            "recall_relative": 0.0,
+            "recall_new": 0.9873417721518988
+          },
+          {
+            "bin": "[2000, 5000)",
+            "n": 1265,
+            "balanced_accuracy": 0.32939702045707037,
+            "recall_known": 0.022696929238985315,
+            "recall_relative": 0.014354066985645933,
+            "recall_new": 0.9511400651465798
+          },
+          {
+            "bin": "[5000, 10000)",
+            "n": 1500,
+            "balanced_accuracy": 0.331759794184395,
+            "recall_known": 0.02696629213483146,
+            "recall_relative": 0.017543859649122806,
+            "recall_new": 0.9507692307692308
+          },
+          {
+            "bin": "[10000, 1e+09)",
+            "n": 1269,
+            "balanced_accuracy": 0.33259437833772637,
+            "recall_known": 0.02807486631016043,
+            "recall_relative": 0.004310344827586207,
+            "recall_new": 0.9653979238754326
+          }
+        ],
+        "thresholds": {
+          "t1": 0.4592456140709882,
+          "t2": 0.5131098496254964
+        }
+      },
+      "10": {
+        "n_specimens": 2200,
+        "balanced_accuracy": 0.4095,
+        "recall_known": 0.21,
+        "n_known": 1300,
+        "recall_relative": 0.2025,
+        "n_relative": 400,
+        "recall_new": 0.816,
+        "n_new": 500,
+        "known_species_top1": 0.87,
+        "relative_genus_top1": 0.825,
+        "new_family_top1": 0.352,
+        "auroc_new_vs_rest": 0.7731129411764704,
+        "auroc_known_vs_rest": 0.7615495726495727,
+        "confusion": {
+          "known": {
+            "known": 279,
+            "relative": 486,
+            "new": 535
+          },
+          "relative": {
+            "known": 16,
+            "relative": 96,
+            "new": 288
+          },
+          "new": {
+            "known": 20,
+            "relative": 72,
+            "new": 408
+          }
+        },
+        "balanced_accuracy_ci95": [
+          0.3333887820512821,
+          0.4800179487179487
+        ],
+        "auroc_new_vs_rest_ci95": [
+          0.6324100294117647,
+          0.9060510294117646
+        ],
+        "n_boot": 2000,
+        "species_per_class": {
+          "known": 13,
+          "relative": 4,
+          "new": 5
+        },
+        "by_read_identity": [
+          {
+            "bin": "[0, 0.88)",
+            "n": 2,
+            "balanced_accuracy": 0.5,
+            "recall_known": 0.0,
+            "recall_relative": NaN,
+            "recall_new": 1.0
+          },
+          {
+            "bin": "[0.88, 0.92)",
+            "n": 1024,
+            "balanced_accuracy": 0.39188535503039407,
+            "recall_known": 0.172859450726979,
+            "recall_relative": 0.19662921348314608,
+            "recall_new": 0.8061674008810573
+          },
+          {
+            "bin": "[0.92, 0.96)",
+            "n": 1174,
+            "balanced_accuracy": 0.4249514220102455,
+            "recall_known": 0.24411764705882352,
+            "recall_relative": 0.2072072072072072,
+            "recall_new": 0.8235294117647058
+          }
+        ],
+        "by_read_length": [
+          {
+            "bin": "[2000, 5000)",
+            "n": 41,
+            "balanced_accuracy": 0.367816091954023,
+            "recall_known": 0.10344827586206896,
+            "recall_relative": 0.0,
+            "recall_new": 1.0
+          },
+          {
+            "bin": "[5000, 10000)",
+            "n": 1826,
+            "balanced_accuracy": 0.4085201948791446,
+            "recall_known": 0.2039289055191768,
+            "recall_relative": 0.1945288753799392,
+            "recall_new": 0.8271028037383178
+          },
+          {
+            "bin": "[10000, 1e+09)",
+            "n": 333,
+            "balanced_accuracy": 0.4181313420521156,
+            "recall_known": 0.25742574257425743,
+            "recall_relative": 0.265625,
+            "recall_new": 0.7313432835820896
+          }
+        ],
+        "thresholds": {
+          "t1": 0.3672615508338315,
+          "t2": 0.4998195734455358
+        }
+      },
+      "50": {
+        "n_specimens": 440,
+        "balanced_accuracy": 0.5435897435897435,
+        "recall_known": 0.4307692307692308,
+        "n_known": 260,
+        "recall_relative": 0.25,
+        "n_relative": 80,
+        "recall_new": 0.95,
+        "n_new": 100,
+        "known_species_top1": 0.9961538461538462,
+        "relative_genus_top1": 1.0,
+        "new_family_top1": 0.4,
+        "auroc_new_vs_rest": 0.9095588235294118,
+        "auroc_known_vs_rest": 0.8990811965811966,
+        "confusion": {
+          "known": {
+            "known": 112,
+            "relative": 98,
+            "new": 50
+          },
+          "relative": {
+            "known": 3,
+            "relative": 20,
+            "new": 57
+          },
+          "new": {
+            "known": 0,
+            "relative": 5,
+            "new": 95
+          }
+        },
+        "balanced_accuracy_ci95": [
+          0.4403846153846154,
+          0.658974358974359
+        ],
+        "auroc_new_vs_rest_ci95": [
+          0.7988220588235293,
+          0.9886794117647059
+        ],
+        "n_boot": 2000,
+        "species_per_class": {
+          "known": 13,
+          "relative": 4,
+          "new": 5
+        },
+        "by_read_identity": [
+          {
+            "bin": "[0.88, 0.92)",
+            "n": 208,
+            "balanced_accuracy": 0.5263638642505657,
+            "recall_known": 0.4198473282442748,
+            "recall_relative": 0.21052631578947367,
+            "recall_new": 0.9487179487179487
+          },
+          {
+            "bin": "[0.92, 0.96)",
+            "n": 232,
+            "balanced_accuracy": 0.559464807653904,
+            "recall_known": 0.4418604651162791,
+            "recall_relative": 0.2857142857142857,
+            "recall_new": 0.9508196721311475
+          }
+        ],
+        "by_read_length": [
+          {
+            "bin": "[5000, 10000)",
+            "n": 433,
+            "balanced_accuracy": 0.5436100131752305,
+            "recall_known": 0.4308300395256917,
+            "recall_relative": 0.25,
+            "recall_new": 0.95
+          },
+          {
+            "bin": "[10000, 1e+09)",
+            "n": 7,
+            "balanced_accuracy": 0.42857142857142855,
+            "recall_known": 0.42857142857142855,
+            "recall_relative": NaN,
+            "recall_new": NaN
+          }
+        ],
+        "thresholds": {
+          "t1": 0.17843122638050635,
+          "t2": 0.2907392622238428
+        }
+      }
+    },
+    "kmer_head": {
+      "1": {
+        "n_specimens": 4400,
+        "balanced_accuracy": 0.3766730769230769,
+        "recall_known": 0.18076923076923077,
+        "n_known": 2600,
+        "recall_relative": 0.08125,
+        "n_relative": 800,
+        "recall_new": 0.868,
+        "n_new": 1000,
+        "known_species_top1": 0.5553846153846154,
+        "relative_genus_top1": 0.53625,
+        "new_family_top1": 0.167,
+        "auroc_new_vs_rest": 0.6477357352941175,
+        "auroc_known_vs_rest": 0.6176434829059829,
+        "confusion": {
+          "known": {
+            "known": 562,
+            "relative": 377,
+            "new": 1661
+          },
+          "relative": {
+            "known": 131,
+            "relative": 73,
+            "new": 596
+          },
+          "new": {
+            "known": 62,
+            "relative": 70,
+            "new": 868
+          }
+        },
+        "balanced_accuracy_ci95": [
+          0.3567280448717949,
+          0.39659262820512825
+        ],
+        "auroc_new_vs_rest_ci95": [
+          0.616445955882353,
+          0.6784290036764706
+        ],
+        "n_boot": 2000,
+        "species_per_class": {
+          "known": 13,
+          "relative": 4,
+          "new": 5
+        },
+        "by_read_identity": [
+          {
+            "bin": "[0, 0.88)",
+            "n": 439,
+            "balanced_accuracy": 0.35535643550349433,
+            "recall_known": 0.10661764705882353,
+            "recall_relative": 0.1038961038961039,
+            "recall_new": 0.8555555555555555
+          },
+          {
+            "bin": "[0.88, 0.92)",
+            "n": 1495,
+            "balanced_accuracy": 0.3741262003696582,
+            "recall_known": 0.18285714285714286,
+            "recall_relative": 0.06273062730627306,
+            "recall_new": 0.8767908309455588
+          },
+          {
+            "bin": "[0.92, 0.96)",
+            "n": 2227,
+            "balanced_accuracy": 0.3820369604334135,
+            "recall_known": 0.18916857360793288,
+            "recall_relative": 0.0889423076923077,
+            "recall_new": 0.868
+          },
+          {
+            "bin": "[0.96, 1)",
+            "n": 239,
+            "balanced_accuracy": 0.38393109110033613,
+            "recall_known": 0.2323943661971831,
+            "recall_relative": 0.08333333333333333,
+            "recall_new": 0.8360655737704918
+          }
+        ],
+        "by_read_length": [
+          {
+            "bin": "[0, 2000)",
+            "n": 366,
+            "balanced_accuracy": 0.35965926704026185,
+            "recall_known": 0.11267605633802817,
+            "recall_relative": 0.06756756756756757,
+            "recall_new": 0.8987341772151899
+          },
+          {
+            "bin": "[2000, 5000)",
+            "n": 1265,
+            "balanced_accuracy": 0.38086207357081575,
+            "recall_known": 0.1802403204272363,
+            "recall_relative": 0.0861244019138756,
+            "recall_new": 0.8762214983713354
+          },
+          {
+            "bin": "[5000, 10000)",
+            "n": 1500,
+            "balanced_accuracy": 0.3851026298099036,
+            "recall_known": 0.1752808988764045,
+            "recall_relative": 0.08771929824561403,
+            "recall_new": 0.8923076923076924
+          },
+          {
+            "bin": "[10000, 1e+09)",
+            "n": 1269,
+            "balanced_accuracy": 0.3680081750568566,
+            "recall_known": 0.2072192513368984,
+            "recall_relative": 0.07327586206896551,
+            "recall_new": 0.8235294117647058
+          }
+        ],
+        "thresholds": {
+          "t1": 0.01098146720148211,
+          "t2": 0.020040497108919537
+        }
+      },
+      "10": {
+        "n_specimens": 2200,
+        "balanced_accuracy": 0.5749102564102564,
+        "recall_known": 0.23923076923076922,
+        "n_known": 1300,
+        "recall_relative": 0.6675,
+        "n_relative": 400,
+        "recall_new": 0.818,
+        "n_new": 500,
+        "known_species_top1": 0.8676923076923077,
+        "relative_genus_top1": 0.98,
+        "new_family_top1": 0.352,
+        "auroc_new_vs_rest": 0.9330952941176469,
+        "auroc_known_vs_rest": 0.8599337606837608,
+        "confusion": {
+          "known": {
+            "known": 392,
+            "relative": 819,
+            "new": 89
+          },
+          "relative": {
+            "known": 29,
+            "relative": 267,
+            "new": 104
+          },
+          "new": {
+            "known": 2,
+            "relative": 89,
+            "new": 409
+          }
+        },
+        "balanced_accuracy_ci95": [
+          0.5125346153846153,
+          0.6366224358974358
+        ],
+        "auroc_new_vs_rest_ci95": [
+          0.8832674411764707,
+          0.9761238529411764
+        ],
+        "n_boot": 2000,
+        "species_per_class": {
+          "known": 13,
+          "relative": 4,
+          "new": 5
+        },
+        "by_read_identity": [
+          {
+            "bin": "[0, 0.88)",
+            "n": 2,
+            "balanced_accuracy": 1.0,
+            "recall_known": 1.0,
+            "recall_relative": NaN,
+            "recall_new": 1.0
+          },
+          {
+            "bin": "[0.88, 0.92)",
+            "n": 1024,
+            "balanced_accuracy": 0.5582189857491427,
+            "recall_known": 0.21163166397415187,
+            "recall_relative": 0.6348314606741573,
+            "recall_new": 0.8281938325991189
+          },
+          {
+            "bin": "[0.92, 0.96)",
+            "n": 1174,
+            "balanced_accuracy": 0.5885841724077018,
+            "recall_known": 0.26323529411764707,
+            "recall_relative": 0.6936936936936937,
+            "recall_new": 0.8088235294117647
+          }
+        ],
+        "by_read_length": [
+          {
+            "bin": "[2000, 5000)",
+            "n": 41,
+            "balanced_accuracy": 0.5507389162561577,
+            "recall_known": 0.13793103448275862,
+            "recall_relative": 0.7142857142857143,
+            "recall_new": 0.8
+          },
+          {
+            "bin": "[5000, 10000)",
+            "n": 1826,
+            "balanced_accuracy": 0.5770995064564765,
+            "recall_known": 0.23105706267539758,
+            "recall_relative": 0.6778115501519757,
+            "recall_new": 0.822429906542056
+          },
+          {
+            "bin": "[10000, 1e+09)",
+            "n": 333,
+            "balanced_accuracy": 0.5658164930299,
+            "recall_known": 0.297029702970297,
+            "recall_relative": 0.609375,
+            "recall_new": 0.7910447761194029
+          }
+        ],
+        "thresholds": {
+          "t1": 0.03311498440689777,
+          "t2": 0.15306753249623672
+        }
+      },
+      "50": {
+        "n_specimens": 440,
+        "balanced_accuracy": 0.6593589743589744,
+        "recall_known": 0.3730769230769231,
+        "n_known": 260,
+        "recall_relative": 0.675,
+        "n_relative": 80,
+        "recall_new": 0.93,
+        "n_new": 100,
+        "known_species_top1": 0.8461538461538461,
+        "relative_genus_top1": 1.0,
+        "new_family_top1": 0.4,
+        "auroc_new_vs_rest": 0.9888235294117647,
+        "auroc_known_vs_rest": 0.9301068376068377,
+        "confusion": {
+          "known": {
+            "known": 134,
+            "relative": 122,
+            "new": 4
+          },
+          "relative": {
+            "known": 8,
+            "relative": 54,
+            "new": 18
+          },
+          "new": {
+            "known": 0,
+            "relative": 7,
+            "new": 93
+          }
+        },
+        "balanced_accuracy_ci95": [
+          0.5949342948717949,
+          0.7266698717948717
+        ],
+        "auroc_new_vs_rest_ci95": [
+          0.9727551470588236,
+          1.0
+        ],
+        "n_boot": 2000,
+        "species_per_class": {
+          "known": 13,
+          "relative": 4,
+          "new": 5
+        },
+        "by_read_identity": [
+          {
+            "bin": "[0.88, 0.92)",
+            "n": 208,
+            "balanced_accuracy": 0.6717608760597913,
+            "recall_known": 0.3816793893129771,
+            "recall_relative": 0.7105263157894737,
+            "recall_new": 0.9230769230769231
+          },
+          {
+            "bin": "[0.92, 0.96)",
+            "n": 232,
+            "balanced_accuracy": 0.6472081525455525,
+            "recall_known": 0.3643410852713178,
+            "recall_relative": 0.6428571428571429,
+            "recall_new": 0.9344262295081968
+          }
+        ],
+        "by_read_length": [
+          {
+            "bin": "[5000, 10000)",
+            "n": 433,
+            "balanced_accuracy": 0.6588471673254283,
+            "recall_known": 0.3715415019762846,
+            "recall_relative": 0.675,
+            "recall_new": 0.93
+          },
+          {
+            "bin": "[10000, 1e+09)",
+            "n": 7,
+            "balanced_accuracy": 0.42857142857142855,
+            "recall_known": 0.42857142857142855,
+            "recall_relative": NaN,
+            "recall_new": NaN
+          }
+        ],
+        "thresholds": {
+          "t1": 0.04398621895804477,
+          "t2": 0.12230007253100518
+        }
+      }
+    },
+    "plantcad_raw": {
+      "1": {
+        "n_specimens": 4400,
+        "balanced_accuracy": 0.3333333333333333,
+        "recall_known": 0.0,
+        "n_known": 2600,
+        "recall_relative": 0.0,
+        "n_relative": 800,
+        "recall_new": 1.0,
+        "n_new": 1000,
+        "known_species_top1": 0.19615384615384615,
+        "relative_genus_top1": 0.1925,
+        "new_family_top1": 0.176,
+        "auroc_new_vs_rest": 0.5410404411764705,
+        "auroc_known_vs_rest": 0.5432413461538461,
+        "confusion": {
+          "known": {
+            "known": 0,
+            "relative": 0,
+            "new": 2600
+          },
+          "relative": {
+            "known": 0,
+            "relative": 0,
+            "new": 800
+          },
+          "new": {
+            "known": 0,
+            "relative": 0,
+            "new": 1000
+          }
+        },
+        "balanced_accuracy_ci95": [
+          0.3333333333333333,
+          0.3333333333333333
+        ],
+        "auroc_new_vs_rest_ci95": [
+          0.47333424999999996,
+          0.6145511544117647
+        ],
+        "n_boot": 2000,
+        "species_per_class": {
+          "known": 13,
+          "relative": 4,
+          "new": 5
+        },
+        "by_read_identity": [
+          {
+            "bin": "[0, 0.88)",
+            "n": 439,
+            "balanced_accuracy": 0.3333333333333333,
+            "recall_known": 0.0,
+            "recall_relative": 0.0,
+            "recall_new": 1.0
+          },
+          {
+            "bin": "[0.88, 0.92)",
+            "n": 1495,
+            "balanced_accuracy": 0.3333333333333333,
+            "recall_known": 0.0,
+            "recall_relative": 0.0,
+            "recall_new": 1.0
+          },
+          {
+            "bin": "[0.92, 0.96)",
+            "n": 2227,
+            "balanced_accuracy": 0.3333333333333333,
+            "recall_known": 0.0,
+            "recall_relative": 0.0,
+            "recall_new": 1.0
+          },
+          {
+            "bin": "[0.96, 1)",
+            "n": 239,
+            "balanced_accuracy": 0.3333333333333333,
+            "recall_known": 0.0,
+            "recall_relative": 0.0,
+            "recall_new": 1.0
+          }
+        ],
+        "by_read_length": [
+          {
+            "bin": "[0, 2000)",
+            "n": 366,
+            "balanced_accuracy": 0.3333333333333333,
+            "recall_known": 0.0,
+            "recall_relative": 0.0,
+            "recall_new": 1.0
+          },
+          {
+            "bin": "[2000, 5000)",
+            "n": 1265,
+            "balanced_accuracy": 0.3333333333333333,
+            "recall_known": 0.0,
+            "recall_relative": 0.0,
+            "recall_new": 1.0
+          },
+          {
+            "bin": "[5000, 10000)",
+            "n": 1500,
+            "balanced_accuracy": 0.3333333333333333,
+            "recall_known": 0.0,
+            "recall_relative": 0.0,
+            "recall_new": 1.0
+          },
+          {
+            "bin": "[10000, 1e+09)",
+            "n": 1269,
+            "balanced_accuracy": 0.3333333333333333,
+            "recall_known": 0.0,
+            "recall_relative": 0.0,
+            "recall_new": 1.0
+          }
+        ],
+        "thresholds": {
+          "t1": 0.030608414603637696,
+          "t2": 0.030608414603637696
+        }
+      },
+      "10": {
+        "n_specimens": 2200,
+        "balanced_accuracy": 0.33214102564102566,
+        "recall_known": 0.17692307692307693,
+        "n_known": 1300,
+        "recall_relative": 0.0375,
+        "n_relative": 400,
+        "recall_new": 0.782,
+        "n_new": 500,
+        "known_species_top1": 0.5392307692307692,
+        "relative_genus_top1": 0.3325,
+        "new_family_top1": 0.224,
+        "auroc_new_vs_rest": 0.589975294117647,
+        "auroc_known_vs_rest": 0.6386598290598291,
+        "confusion": {
+          "known": {
+            "known": 322,
+            "relative": 196,
+            "new": 782
+          },
+          "relative": {
+            "known": 29,
+            "relative": 45,
+            "new": 326
+          },
+          "new": {
+            "known": 59,
+            "relative": 50,
+            "new": 391
+          }
+        },
+        "balanced_accuracy_ci95": [
+          0.26851025641025644,
+          0.39277724358974353
+        ],
+        "auroc_new_vs_rest_ci95": [
+          0.43517341176470586,
+          0.7441166470588233
+        ],
+        "n_boot": 2000,
+        "species_per_class": {
+          "known": 13,
+          "relative": 4,
+          "new": 5
+        },
+        "by_read_identity": [
+          {
+            "bin": "[0, 0.88)",
+            "n": 2,
+            "balanced_accuracy": 0.5,
+            "recall_known": 0.0,
+            "recall_relative": NaN,
+            "recall_new": 1.0
+          },
+          {
+            "bin": "[0.88, 0.92)",
+            "n": 1024,
+            "balanced_accuracy": 0.32422952002175226,
+            "recall_known": 0.16639741518578352,
+            "recall_relative": 0.06179775280898876,
+            "recall_new": 0.7444933920704846
+          },
+          {
+            "bin": "[0.92, 0.96)",
+            "n": 1174,
+            "balanced_accuracy": 0.33909424130012367,
+            "recall_known": 0.18676470588235294,
+            "recall_relative": 0.018018018018018018,
+            "recall_new": 0.8125
+          }
+        ],
+        "by_read_length": [
+          {
+            "bin": "[2000, 5000)",
+            "n": 41,
+            "balanced_accuracy": 0.3241379310344828,
+            "recall_known": 0.1724137931034483,
+            "recall_relative": 0.0,
+            "recall_new": 0.8
+          },
+          {
+            "bin": "[5000, 10000)",
+            "n": 1826,
+            "balanced_accuracy": 0.3277877083019604,
+            "recall_known": 0.17118802619270346,
+            "recall_relative": 0.0364741641337386,
+            "recall_new": 0.7757009345794392
+          },
+          {
+            "bin": "[10000, 1e+09)",
+            "n": 333,
+            "balanced_accuracy": 0.35856377148908924,
+            "recall_known": 0.2079207920792079,
+            "recall_relative": 0.046875,
+            "recall_new": 0.8208955223880597
+          }
+        ],
+        "thresholds": {
+          "t1": 0.1000812673688534,
+          "t2": 0.1353538491618094
+        }
+      },
+      "50": {
+        "n_specimens": 440,
+        "balanced_accuracy": 0.42846153846153845,
+        "recall_known": 0.6653846153846154,
+        "n_known": 260,
+        "recall_relative": 0.0,
+        "n_relative": 80,
+        "recall_new": 0.62,
+        "n_new": 100,
+        "known_species_top1": 0.8307692307692308,
+        "relative_genus_top1": 0.425,
+        "new_family_top1": 0.21,
+        "auroc_new_vs_rest": 0.7346470588235294,
+        "auroc_known_vs_rest": 0.7842094017094017,
+        "confusion": {
+          "known": {
+            "known": 185,
+            "relative": 17,
+            "new": 58
+          },
+          "relative": {
+            "known": 23,
+            "relative": 5,
+            "new": 52
+          },
+          "new": {
+            "known": 25,
+            "relative": 13,
+            "new": 62
+          }
+        },
+        "balanced_accuracy_ci95": [
+          0.29819230769230765,
+          0.5503141025641023
+        ],
+        "auroc_new_vs_rest_ci95": [
+          0.5444176470588235,
+          0.8998926470588233
+        ],
+        "n_boot": 2000,
+        "species_per_class": {
+          "known": 13,
+          "relative": 4,
+          "new": 5
+        },
+        "by_read_identity": [
+          {
+            "bin": "[0.88, 0.92)",
+            "n": 208,
+            "balanced_accuracy": 0.4385072094995759,
+            "recall_known": 0.648854961832061,
+            "recall_relative": 0.0,
+            "recall_new": 0.6666666666666666
+          },
+          {
+            "bin": "[0.92, 0.96)",
+            "n": 232,
+            "balanced_accuracy": 0.42411149235396284,
+            "recall_known": 0.6821705426356589,
+            "recall_relative": 0.0,
+            "recall_new": 0.5901639344262295
+          }
+        ],
+        "by_read_length": [
+          {
+            "bin": "[5000, 10000)",
+            "n": 433,
+            "balanced_accuracy": 0.4293280632411067,
+            "recall_known": 0.6679841897233202,
+            "recall_relative": 0.0,
+            "recall_new": 0.62
+          },
+          {
+            "bin": "[10000, 1e+09)",
+            "n": 7,
+            "balanced_accuracy": 0.5714285714285714,
+            "recall_known": 0.5714285714285714,
+            "recall_relative": NaN,
+            "recall_new": NaN
+          }
+        ],
+        "thresholds": {
+          "t1": 0.08892659955288297,
+          "t2": 0.11074114355010603
+        }
+      }
+    },
+    "plantcad_head": {
+      "1": {
+        "n_specimens": 4400,
+        "balanced_accuracy": 0.33716666666666667,
+        "recall_known": 0.0,
+        "n_known": 2600,
+        "recall_relative": 0.0925,
+        "n_relative": 800,
+        "recall_new": 0.919,
+        "n_new": 1000,
+        "known_species_top1": 0.5273076923076923,
+        "relative_genus_top1": 0.48375,
+        "new_family_top1": 0.198,
+        "auroc_new_vs_rest": 0.6120823529411764,
+        "auroc_known_vs_rest": 0.5957020299145299,
+        "confusion": {
+          "known": {
+            "known": 0,
+            "relative": 421,
+            "new": 2179
+          },
+          "relative": {
+            "known": 1,
+            "relative": 88,
+            "new": 711
+          },
+          "new": {
+            "known": 1,
+            "relative": 80,
+            "new": 919
+          }
+        },
+        "balanced_accuracy_ci95": [
+          0.3076625,
+          0.3640041666666667
+        ],
+        "auroc_new_vs_rest_ci95": [
+          0.5554581286764706,
+          0.6595669852941176
+        ],
+        "n_boot": 2000,
+        "species_per_class": {
+          "known": 13,
+          "relative": 4,
+          "new": 5
+        },
+        "by_read_identity": [
+          {
+            "bin": "[0, 0.88)",
+            "n": 439,
+            "balanced_accuracy": 0.35315055315055316,
+            "recall_known": 0.0,
+            "recall_relative": 0.1038961038961039,
+            "recall_new": 0.9555555555555556
+          },
+          {
+            "bin": "[0.88, 0.92)",
+            "n": 1495,
+            "balanced_accuracy": 0.33051029650697655,
+            "recall_known": 0.0,
+            "recall_relative": 0.07749077490774908,
+            "recall_new": 0.9140401146131805
+          },
+          {
+            "bin": "[0.92, 0.96)",
+            "n": 2227,
+            "balanced_accuracy": 0.33805128205128204,
+            "recall_known": 0.0,
+            "recall_relative": 0.09615384615384616,
+            "recall_new": 0.918
+          },
+          {
+            "bin": "[0.96, 1)",
+            "n": 239,
+            "balanced_accuracy": 0.34684274438372803,
+            "recall_known": 0.0,
+            "recall_relative": 0.1388888888888889,
+            "recall_new": 0.9016393442622951
+          }
+        ],
+        "by_read_length": [
+          {
+            "bin": "[0, 2000)",
+            "n": 366,
+            "balanced_accuracy": 0.3522066370167636,
+            "recall_known": 0.0,
+            "recall_relative": 0.0945945945945946,
+            "recall_new": 0.9620253164556962
+          },
+          {
+            "bin": "[2000, 5000)",
+            "n": 1265,
+            "balanced_accuracy": 0.34249749336325713,
+            "recall_known": 0.0,
+            "recall_relative": 0.0861244019138756,
+            "recall_new": 0.9413680781758957
+          },
+          {
+            "bin": "[5000, 10000)",
+            "n": 1500,
+            "balanced_accuracy": 0.33677013045434095,
+            "recall_known": 0.0,
+            "recall_relative": 0.10877192982456141,
+            "recall_new": 0.9015384615384615
+          },
+          {
+            "bin": "[10000, 1e+09)",
+            "n": 1269,
+            "balanced_accuracy": 0.32690013124925427,
+            "recall_known": 0.0,
+            "recall_relative": 0.07758620689655173,
+            "recall_new": 0.903114186851211
+          }
+        ],
+        "thresholds": {
+          "t1": 0.013044058276580811,
+          "t2": 0.03245836466401067
+        }
+      },
+      "10": {
+        "n_specimens": 2200,
+        "balanced_accuracy": 0.5362692307692307,
+        "recall_known": 0.4623076923076923,
+        "n_known": 1300,
+        "recall_relative": 0.3225,
+        "n_relative": 400,
+        "recall_new": 0.824,
+        "n_new": 500,
+        "known_species_top1": 0.8946153846153846,
+        "relative_genus_top1": 0.92,
+        "new_family_top1": 0.38,
+        "auroc_new_vs_rest": 0.8914988235294118,
+        "auroc_known_vs_rest": 0.8752376068376068,
+        "confusion": {
+          "known": {
+            "known": 666,
+            "relative": 494,
+            "new": 140
+          },
+          "relative": {
+            "known": 56,
+            "relative": 130,
+            "new": 214
+          },
+          "new": {
+            "known": 15,
+            "relative": 73,
+            "new": 412
+          }
+        },
+        "balanced_accuracy_ci95": [
+          0.4370753205128205,
+          0.6223221153846153
+        ],
+        "auroc_new_vs_rest_ci95": [
+          0.7747623970588234,
+          0.9769418235294117
+        ],
+        "n_boot": 2000,
+        "species_per_class": {
+          "known": 13,
+          "relative": 4,
+          "new": 5
+        },
+        "by_read_identity": [
+          {
+            "bin": "[0, 0.88)",
+            "n": 2,
+            "balanced_accuracy": 1.0,
+            "recall_known": 1.0,
+            "recall_relative": NaN,
+            "recall_new": 1.0
+          },
+          {
+            "bin": "[0.88, 0.92)",
+            "n": 1024,
+            "balanced_accuracy": 0.5293762521499937,
+            "recall_known": 0.42649434571890144,
+            "recall_relative": 0.3202247191011236,
+            "recall_new": 0.8414096916299559
+          },
+          {
+            "bin": "[0.92, 0.96)",
+            "n": 1174,
+            "balanced_accuracy": 0.5424218335983042,
+            "recall_known": 0.49411764705882355,
+            "recall_relative": 0.32432432432432434,
+            "recall_new": 0.8088235294117647
+          }
+        ],
+        "by_read_length": [
+          {
+            "bin": "[2000, 5000)",
+            "n": 41,
+            "balanced_accuracy": 0.5474548440065682,
+            "recall_known": 0.41379310344827586,
+            "recall_relative": 0.42857142857142855,
+            "recall_new": 0.8
+          },
+          {
+            "bin": "[5000, 10000)",
+            "n": 1826,
+            "balanced_accuracy": 0.5330023190099853,
+            "recall_known": 0.44808231992516373,
+            "recall_relative": 0.3191489361702128,
+            "recall_new": 0.8317757009345794
+          },
+          {
+            "bin": "[10000, 1e+09)",
+            "n": 333,
+            "balanced_accuracy": 0.5495996194768731,
+            "recall_known": 0.5445544554455446,
+            "recall_relative": 0.328125,
+            "recall_new": 0.7761194029850746
+          }
+        ],
+        "thresholds": {
+          "t1": 0.011092342923034975,
+          "t2": 0.026236945959790866
+        }
+      },
+      "50": {
+        "n_specimens": 440,
+        "balanced_accuracy": 0.625576923076923,
+        "recall_known": 0.9192307692307692,
+        "n_known": 260,
+        "recall_relative": 0.0875,
+        "n_relative": 80,
+        "recall_new": 0.87,
+        "n_new": 100,
+        "known_species_top1": 0.9576923076923077,
+        "relative_genus_top1": 0.9625,
+        "new_family_top1": 0.4,
+        "auroc_new_vs_rest": 0.9452647058823529,
+        "auroc_known_vs_rest": 0.9687393162393163,
+        "confusion": {
+          "known": {
+            "known": 250,
+            "relative": 4,
+            "new": 6
+          },
+          "relative": {
+            "known": 27,
+            "relative": 7,
+            "new": 46
+          },
+          "new": {
+            "known": 7,
+            "relative": 6,
+            "new": 87
+          }
+        },
+        "balanced_accuracy_ci95": [
+          0.5324839743589744,
+          0.6907051282051282
+        ],
+        "auroc_new_vs_rest_ci95": [
+          0.85905,
+          0.9999999999999999
+        ],
+        "n_boot": 2000,
+        "species_per_class": {
+          "known": 13,
+          "relative": 4,
+          "new": 5
+        },
+        "by_read_identity": [
+          {
+            "bin": "[0.88, 0.92)",
+            "n": 208,
+            "balanced_accuracy": 0.6194881409827171,
+            "recall_known": 0.9083969465648855,
+            "recall_relative": 0.05263157894736842,
+            "recall_new": 0.8974358974358975
+          },
+          {
+            "bin": "[0.92, 0.96)",
+            "n": 232,
+            "balanced_accuracy": 0.6339130645268655,
+            "recall_known": 0.9302325581395349,
+            "recall_relative": 0.11904761904761904,
+            "recall_new": 0.8524590163934426
+          }
+        ],
+        "by_read_length": [
+          {
+            "bin": "[5000, 10000)",
+            "n": 433,
+            "balanced_accuracy": 0.6248320158102767,
+            "recall_known": 0.9169960474308301,
+            "recall_relative": 0.0875,
+            "recall_new": 0.87
+          },
+          {
+            "bin": "[10000, 1e+09)",
+            "n": 7,
+            "balanced_accuracy": 1.0,
+            "recall_known": 1.0,
+            "recall_relative": NaN,
+            "recall_new": NaN
+          }
+        ],
+        "thresholds": {
+          "t1": 0.01214812718444135,
+          "t2": 0.0140286150889181
+        }
+      }
+    },
+    "plantcad_ft2_head": {
+      "1": {
+        "n_specimens": 4400,
+        "balanced_accuracy": 0.33316666666666667,
+        "recall_known": 0.0,
+        "n_known": 2600,
+        "recall_relative": 0.2275,
+        "n_relative": 800,
+        "recall_new": 0.772,
+        "n_new": 1000,
+        "known_species_top1": 0.5269230769230769,
+        "relative_genus_top1": 0.45625,
+        "new_family_top1": 0.194,
+        "auroc_new_vs_rest": 0.6052582352941177,
+        "auroc_known_vs_rest": 0.5965619658119659,
+        "confusion": {
+          "known": {
+            "known": 0,
+            "relative": 1058,
+            "new": 1542
+          },
+          "relative": {
+            "known": 0,
+            "relative": 264,
+            "new": 536
+          },
+          "new": {
+            "known": 1,
+            "relative": 227,
+            "new": 772
+          }
+        },
+        "balanced_accuracy_ci95": [
+          0.29366458333333334,
+          0.3715895833333333
+        ],
+        "auroc_new_vs_rest_ci95": [
+          0.5528765220588234,
+          0.654651161764706
+        ],
+        "n_boot": 2000,
+        "species_per_class": {
+          "known": 13,
+          "relative": 4,
+          "new": 5
+        },
+        "by_read_identity": [
+          {
+            "bin": "[0, 0.88)",
+            "n": 439,
+            "balanced_accuracy": 0.36190476190476195,
+            "recall_known": 0.0,
+            "recall_relative": 0.2857142857142857,
+            "recall_new": 0.8
+          },
+          {
+            "bin": "[0.88, 0.92)",
+            "n": 1495,
+            "balanced_accuracy": 0.3284097597422966,
+            "recall_known": 0.0,
+            "recall_relative": 0.22878228782287824,
+            "recall_new": 0.7564469914040115
+          },
+          {
+            "bin": "[0.92, 0.96)",
+            "n": 2227,
+            "balanced_accuracy": 0.3349166666666667,
+            "recall_known": 0.0,
+            "recall_relative": 0.21875,
+            "recall_new": 0.786
+          },
+          {
+            "bin": "[0.96, 1)",
+            "n": 239,
+            "balanced_accuracy": 0.2997874924104432,
+            "recall_known": 0.0,
+            "recall_relative": 0.19444444444444445,
+            "recall_new": 0.7049180327868853
+          }
+        ],
+        "by_read_length": [
+          {
+            "bin": "[0, 2000)",
+            "n": 366,
+            "balanced_accuracy": 0.3589919032957008,
+            "recall_known": 0.0,
+            "recall_relative": 0.21621621621621623,
+            "recall_new": 0.8607594936708861
+          },
+          {
+            "bin": "[2000, 5000)",
+            "n": 1265,
+            "balanced_accuracy": 0.330320174139821,
+            "recall_known": 0.0,
+            "recall_relative": 0.19617224880382775,
+            "recall_new": 0.7947882736156352
+          },
+          {
+            "bin": "[5000, 10000)",
+            "n": 1500,
+            "balanced_accuracy": 0.33300944669365723,
+            "recall_known": 0.0,
+            "recall_relative": 0.24210526315789474,
+            "recall_new": 0.7569230769230769
+          },
+          {
+            "bin": "[10000, 1e+09)",
+            "n": 1269,
+            "balanced_accuracy": 0.3272879131368572,
+            "recall_known": 0.0,
+            "recall_relative": 0.2413793103448276,
+            "recall_new": 0.740484429065744
+          }
+        ],
+        "thresholds": {
+          "t1": 0.011687755584716797,
+          "t2": 0.04641688558923539
+        }
+      },
+      "10": {
+        "n_specimens": 2200,
+        "balanced_accuracy": 0.5544615384615385,
+        "recall_known": 0.5653846153846154,
+        "n_known": 1300,
+        "recall_relative": 0.28,
+        "n_relative": 400,
+        "recall_new": 0.818,
+        "n_new": 500,
+        "known_species_top1": 0.91,
+        "relative_genus_top1": 0.885,
+        "new_family_top1": 0.378,
+        "auroc_new_vs_rest": 0.8876741176470588,
+        "auroc_known_vs_rest": 0.8851606837606839,
+        "confusion": {
+          "known": {
+            "known": 804,
+            "relative": 361,
+            "new": 135
+          },
+          "relative": {
+            "known": 63,
+            "relative": 112,
+            "new": 225
+          },
+          "new": {
+            "known": 25,
+            "relative": 66,
+            "new": 409
+          }
+        },
+        "balanced_accuracy_ci95": [
+          0.45363397435897435,
+          0.6400394230769231
+        ],
+        "auroc_new_vs_rest_ci95": [
+          0.7658586176470588,
+          0.9793525882352941
+        ],
+        "n_boot": 2000,
+        "species_per_class": {
+          "known": 13,
+          "relative": 4,
+          "new": 5
+        },
+        "by_read_identity": [
+          {
+            "bin": "[0, 0.88)",
+            "n": 2,
+            "balanced_accuracy": 1.0,
+            "recall_known": 1.0,
+            "recall_relative": NaN,
+            "recall_new": 1.0
+          },
+          {
+            "bin": "[0.88, 0.92)",
+            "n": 1024,
+            "balanced_accuracy": 0.5584065541964994,
+            "recall_known": 0.5492730210016155,
+            "recall_relative": 0.29775280898876405,
+            "recall_new": 0.8281938325991189
+          },
+          {
+            "bin": "[0.92, 0.96)",
+            "n": 1174,
+            "balanced_accuracy": 0.5513336866278044,
+            "recall_known": 0.5794117647058824,
+            "recall_relative": 0.26576576576576577,
+            "recall_new": 0.8088235294117647
+          }
+        ],
+        "by_read_length": [
+          {
+            "bin": "[2000, 5000)",
+            "n": 41,
+            "balanced_accuracy": 0.5894909688013136,
+            "recall_known": 0.4827586206896552,
+            "recall_relative": 0.2857142857142857,
+            "recall_new": 1.0
+          },
+          {
+            "bin": "[5000, 10000)",
+            "n": 1826,
+            "balanced_accuracy": 0.5537434928729685,
+            "recall_known": 0.5500467726847521,
+            "recall_relative": 0.2887537993920973,
+            "recall_new": 0.822429906542056
+          },
+          {
+            "bin": "[10000, 1e+09)",
+            "n": 333,
+            "balanced_accuracy": 0.5563034148564111,
+            "recall_known": 0.6584158415841584,
+            "recall_relative": 0.234375,
+            "recall_new": 0.7761194029850746
+          }
+        ],
+        "thresholds": {
+          "t1": 0.012435528800715153,
+          "t2": 0.025130842498798465
+        }
+      },
+      "50": {
+        "n_specimens": 440,
+        "balanced_accuracy": 0.6771794871794872,
+        "recall_known": 0.9115384615384615,
+        "n_known": 260,
+        "recall_relative": 0.25,
+        "n_relative": 80,
+        "recall_new": 0.87,
+        "n_new": 100,
+        "known_species_top1": 0.9653846153846154,
+        "relative_genus_top1": 0.9375,
+        "new_family_top1": 0.4,
+        "auroc_new_vs_rest": 0.9376764705882353,
+        "auroc_known_vs_rest": 0.9714743589743589,
+        "confusion": {
+          "known": {
+            "known": 246,
+            "relative": 10,
+            "new": 4
+          },
+          "relative": {
+            "known": 14,
+            "relative": 20,
+            "new": 46
+          },
+          "new": {
+            "known": 3,
+            "relative": 10,
+            "new": 87
+          }
+        },
+        "balanced_accuracy_ci95": [
+          0.5702275641025641,
+          0.7692467948717947
+        ],
+        "auroc_new_vs_rest_ci95": [
+          0.851160294117647,
+          0.9999999999999999
+        ],
+        "n_boot": 2000,
+        "species_per_class": {
+          "known": 13,
+          "relative": 4,
+          "new": 5
+        },
+        "by_read_identity": [
+          {
+            "bin": "[0.88, 0.92)",
+            "n": 208,
+            "balanced_accuracy": 0.663572711383077,
+            "recall_known": 0.9083969465648855,
+            "recall_relative": 0.21052631578947367,
+            "recall_new": 0.8717948717948718
+          },
+          {
+            "bin": "[0.92, 0.96)",
+            "n": 232,
+            "balanced_accuracy": 0.6897651423004073,
+            "recall_known": 0.9147286821705426,
+            "recall_relative": 0.2857142857142857,
+            "recall_new": 0.8688524590163934
+          }
+        ],
+        "by_read_length": [
+          {
+            "bin": "[5000, 10000)",
+            "n": 433,
+            "balanced_accuracy": 0.6763636363636364,
+            "recall_known": 0.9090909090909091,
+            "recall_relative": 0.25,
+            "recall_new": 0.87
+          },
+          {
+            "bin": "[10000, 1e+09)",
+            "n": 7,
+            "balanced_accuracy": 1.0,
+            "recall_known": 1.0,
+            "recall_relative": NaN,
+            "recall_new": NaN
+          }
+        ],
+        "thresholds": {
+          "t1": 0.00918669017715071,
+          "t2": 0.015164507393860934
+        }
+      }
+    },
+    "minimap2": {
+      "1": {
+        "n_specimens": 4400,
+        "balanced_accuracy": 0.8337884615384615,
+        "recall_known": 0.8996153846153846,
+        "n_known": 2600,
+        "recall_relative": 0.70375,
+        "n_relative": 800,
+        "recall_new": 0.898,
+        "n_new": 1000,
+        "known_species_top1": 0.9776923076923076,
+        "relative_genus_top1": 0.9,
+        "new_family_top1": 0.197,
+        "auroc_new_vs_rest": 0.9668819117647058,
+        "auroc_known_vs_rest": 0.980821794871795,
+        "confusion": {
+          "known": {
+            "known": 2343,
+            "relative": 210,
+            "new": 47
+          },
+          "relative": {
+            "known": 29,
+            "relative": 567,
+            "new": 204
+          },
+          "new": {
+            "known": 0,
+            "relative": 102,
+            "new": 898
+          }
+        },
+        "balanced_accuracy_ci95": [
+          0.7898123397435898,
+          0.8715524038461538
+        ],
+        "auroc_new_vs_rest_ci95": [
+          0.9459502647058823,
+          0.9818944595588235
+        ],
+        "n_boot": 2000,
+        "species_per_class": {
+          "known": 13,
+          "relative": 4,
+          "new": 5
+        },
+        "by_read_identity": [
+          {
+            "bin": "[0, 0.88)",
+            "n": 439,
+            "balanced_accuracy": 0.6536276631864867,
+            "recall_known": 0.43014705882352944,
+            "recall_relative": 0.5974025974025974,
+            "recall_new": 0.9333333333333333
+          },
+          {
+            "bin": "[0.88, 0.92)",
+            "n": 1495,
+            "balanced_accuracy": 0.8573564835443688,
+            "recall_known": 0.9462857142857143,
+            "recall_relative": 0.6974169741697417,
+            "recall_new": 0.9283667621776505
+          },
+          {
+            "bin": "[0.92, 0.96)",
+            "n": 2227,
+            "balanced_accuracy": 0.8499729996675077,
+            "recall_known": 0.9595728451563692,
+            "recall_relative": 0.7163461538461539,
+            "recall_new": 0.874
+          },
+          {
+            "bin": "[0.96, 1)",
+            "n": 239,
+            "balanced_accuracy": 0.8866440904076555,
+            "recall_known": 0.9577464788732394,
+            "recall_relative": 0.8333333333333334,
+            "recall_new": 0.8688524590163934
+          }
+        ],
+        "by_read_length": [
+          {
+            "bin": "[0, 2000)",
+            "n": 366,
+            "balanced_accuracy": 0.7947351880316758,
+            "recall_known": 0.863849765258216,
+            "recall_relative": 0.6216216216216216,
+            "recall_new": 0.8987341772151899
+          },
+          {
+            "bin": "[2000, 5000)",
+            "n": 1265,
+            "balanced_accuracy": 0.8381092933086024,
+            "recall_known": 0.8851802403204272,
+            "recall_relative": 0.7464114832535885,
+            "recall_new": 0.8827361563517915
+          },
+          {
+            "bin": "[5000, 10000)",
+            "n": 1500,
+            "balanced_accuracy": 0.8581225896778824,
+            "recall_known": 0.9202247191011236,
+            "recall_relative": 0.7649122807017544,
+            "recall_new": 0.8892307692307693
+          },
+          {
+            "bin": "[10000, 1e+09)",
+            "n": 1269,
+            "balanced_accuracy": 0.8133291210638783,
+            "recall_known": 0.8997326203208557,
+            "recall_relative": 0.6163793103448276,
+            "recall_new": 0.9238754325259516
+          }
+        ],
+        "thresholds": {
+          "t1": 0.09669309888092946,
+          "t2": 0.8354555346699584
+        }
+      },
+      "10": {
+        "n_specimens": 2200,
+        "balanced_accuracy": 0.9562179487179487,
+        "recall_known": 0.9361538461538461,
+        "n_known": 1300,
+        "recall_relative": 0.9725,
+        "n_relative": 400,
+        "recall_new": 0.96,
+        "n_new": 500,
+        "known_species_top1": 1.0,
+        "relative_genus_top1": 1.0,
+        "new_family_top1": 0.392,
+        "auroc_new_vs_rest": 0.99878,
+        "auroc_known_vs_rest": 0.9999034188034188,
+        "confusion": {
+          "known": {
+            "known": 1217,
+            "relative": 83,
+            "new": 0
+          },
+          "relative": {
+            "known": 0,
+            "relative": 389,
+            "new": 11
+          },
+          "new": {
+            "known": 0,
+            "relative": 20,
+            "new": 480
+          }
+        },
+        "balanced_accuracy_ci95": [
+          0.930485576923077,
+          0.9751926282051281
+        ],
+        "auroc_new_vs_rest_ci95": [
+          0.9955634411764707,
+          1.0
+        ],
+        "n_boot": 2000,
+        "species_per_class": {
+          "known": 13,
+          "relative": 4,
+          "new": 5
+        },
+        "by_read_identity": [
+          {
+            "bin": "[0, 0.88)",
+            "n": 2,
+            "balanced_accuracy": 1.0,
+            "recall_known": 1.0,
+            "recall_relative": NaN,
+            "recall_new": 1.0
+          },
+          {
+            "bin": "[0.88, 0.92)",
+            "n": 1024,
+            "balanced_accuracy": 0.9478145770350169,
+            "recall_known": 0.9192245557350566,
+            "recall_relative": 0.9550561797752809,
+            "recall_new": 0.9691629955947136
+          },
+          {
+            "bin": "[0.92, 0.96)",
+            "n": 1174,
+            "balanced_accuracy": 0.9633876523582406,
+            "recall_known": 0.9514705882352941,
+            "recall_relative": 0.9864864864864865,
+            "recall_new": 0.9522058823529411
+          }
+        ],
+        "by_read_length": [
+          {
+            "bin": "[2000, 5000)",
+            "n": 41,
+            "balanced_accuracy": 0.9885057471264368,
+            "recall_known": 0.9655172413793104,
+            "recall_relative": 1.0,
+            "recall_new": 1.0
+          },
+          {
+            "bin": "[5000, 10000)",
+            "n": 1826,
+            "balanced_accuracy": 0.9557366131619466,
+            "recall_known": 0.9373246024321796,
+            "recall_relative": 0.9696048632218845,
+            "recall_new": 0.9602803738317757
+          },
+          {
+            "bin": "[10000, 1e+09)",
+            "n": 333,
+            "balanced_accuracy": 0.9551138182848136,
+            "recall_known": 0.9257425742574258,
+            "recall_relative": 0.984375,
+            "recall_new": 0.9552238805970149
+          }
+        ],
+        "thresholds": {
+          "t1": 0.15988849835375807,
+          "t2": 0.8031088931219406
+        }
+      },
+      "50": {
+        "n_specimens": 440,
+        "balanced_accuracy": 0.9797435897435897,
+        "recall_known": 0.9692307692307692,
+        "n_known": 260,
+        "recall_relative": 1.0,
+        "n_relative": 80,
+        "recall_new": 0.97,
+        "n_new": 100,
+        "known_species_top1": 1.0,
+        "relative_genus_top1": 1.0,
+        "new_family_top1": 0.4,
+        "auroc_new_vs_rest": 1.0,
+        "auroc_known_vs_rest": 1.0,
+        "confusion": {
+          "known": {
+            "known": 252,
+            "relative": 8,
+            "new": 0
+          },
+          "relative": {
+            "known": 0,
+            "relative": 80,
+            "new": 0
+          },
+          "new": {
+            "known": 0,
+            "relative": 3,
+            "new": 97
+          }
+        },
+        "balanced_accuracy_ci95": [
+          0.9571794871794873,
+          0.9948717948717949
+        ],
+        "auroc_new_vs_rest_ci95": [
+          0.9999999999999999,
+          1.0
+        ],
+        "n_boot": 2000,
+        "species_per_class": {
+          "known": 13,
+          "relative": 4,
+          "new": 5
+        },
+        "by_read_identity": [
+          {
+            "bin": "[0.88, 0.92)",
+            "n": 208,
+            "balanced_accuracy": 0.9812748744046454,
+            "recall_known": 0.9694656488549618,
+            "recall_relative": 1.0,
+            "recall_new": 0.9743589743589743
+          },
+          {
+            "bin": "[0.92, 0.96)",
+            "n": 232,
+            "balanced_accuracy": 0.9787351209387046,
+            "recall_known": 0.9689922480620154,
+            "recall_relative": 1.0,
+            "recall_new": 0.9672131147540983
+          }
+        ],
+        "by_read_length": [
+          {
+            "bin": "[5000, 10000)",
+            "n": 433,
+            "balanced_accuracy": 0.9794598155467721,
+            "recall_known": 0.9683794466403162,
+            "recall_relative": 1.0,
+            "recall_new": 0.97
+          },
+          {
+            "bin": "[10000, 1e+09)",
+            "n": 7,
+            "balanced_accuracy": 1.0,
+            "recall_known": 1.0,
+            "recall_relative": NaN,
+            "recall_new": NaN
+          }
+        ],
+        "thresholds": {
+          "t1": 0.12838276866817758,
+          "t2": 0.8232375310873206
+        }
+      }
+    },
+    "minimap2_train": {
+      "1": {
+        "n_specimens": 4400,
+        "balanced_accuracy": 0.52475,
+        "recall_known": 0.0,
+        "n_known": 2600,
+        "recall_relative": 0.67125,
+        "n_relative": 800,
+        "recall_new": 0.903,
+        "n_new": 1000,
+        "known_species_top1": 0.6580769230769231,
+        "relative_genus_top1": 0.87,
+        "new_family_top1": 0.18,
+        "auroc_new_vs_rest": 0.8785532352941176,
+        "auroc_known_vs_rest": 0.7283610042735043,
+        "confusion": {
+          "known": {
+            "known": 0,
+            "relative": 1801,
+            "new": 799
+          },
+          "relative": {
+            "known": 0,
+            "relative": 542,
+            "new": 258
+          },
+          "new": {
+            "known": 0,
+            "relative": 97,
+            "new": 903
+          }
+        },
+        "balanced_accuracy_ci95": [
+          0.47558124999999996,
+          0.5723416666666666
+        ],
+        "auroc_new_vs_rest_ci95": [
+          0.812489330882353,
+          0.9308039227941176
+        ],
+        "n_boot": 2000,
+        "species_per_class": {
+          "known": 13,
+          "relative": 4,
+          "new": 5
+        },
+        "by_read_identity": [
+          {
+            "bin": "[0, 0.88)",
+            "n": 439,
+            "balanced_accuracy": 0.48797498797498795,
+            "recall_known": 0.0,
+            "recall_relative": 0.5194805194805194,
+            "recall_new": 0.9444444444444444
+          },
+          {
+            "bin": "[0.88, 0.92)",
+            "n": 1495,
+            "balanced_accuracy": 0.526617959589338,
+            "recall_known": 0.0,
+            "recall_relative": 0.6457564575645757,
+            "recall_new": 0.9340974212034384
+          },
+          {
+            "bin": "[0.92, 0.96)",
+            "n": 2227,
+            "balanced_accuracy": 0.5273076923076924,
+            "recall_known": 0.0,
+            "recall_relative": 0.7019230769230769,
+            "recall_new": 0.88
+          },
+          {
+            "bin": "[0.96, 1)",
+            "n": 239,
+            "balanced_accuracy": 0.5619307832422586,
+            "recall_known": 0.0,
+            "recall_relative": 0.8333333333333334,
+            "recall_new": 0.8524590163934426
+          }
+        ],
+        "by_read_length": [
+          {
+            "bin": "[0, 2000)",
+            "n": 366,
+            "balanced_accuracy": 0.5112897707834416,
+            "recall_known": 0.0,
+            "recall_relative": 0.6351351351351351,
+            "recall_new": 0.8987341772151899
+          },
+          {
+            "bin": "[2000, 5000)",
+            "n": 1265,
+            "balanced_accuracy": 0.5494963348554982,
+            "recall_known": 0.0,
+            "recall_relative": 0.7559808612440191,
+            "recall_new": 0.8925081433224755
+          },
+          {
+            "bin": "[5000, 10000)",
+            "n": 1500,
+            "balanced_accuracy": 0.5360323886639676,
+            "recall_known": 0.0,
+            "recall_relative": 0.7157894736842105,
+            "recall_new": 0.8923076923076924
+          },
+          {
+            "bin": "[10000, 1e+09)",
+            "n": 1269,
+            "balanced_accuracy": 0.4930199260231476,
+            "recall_known": 0.0,
+            "recall_relative": 0.5517241379310345,
+            "recall_new": 0.9273356401384083
+          }
+        ],
+        "thresholds": {
+          "t1": 0.024119487334746226,
+          "t2": 0.838411572723442
+        }
+      },
+      "10": {
+        "n_specimens": 2200,
+        "balanced_accuracy": 0.5058333333333334,
+        "recall_known": 0.0,
+        "n_known": 1300,
+        "recall_relative": 0.5175,
+        "n_relative": 400,
+        "recall_new": 1.0,
+        "n_new": 500,
+        "known_species_top1": 0.7738461538461539,
+        "relative_genus_top1": 1.0,
+        "new_family_top1": 0.384,
+        "auroc_new_vs_rest": 0.9897364705882353,
+        "auroc_known_vs_rest": 0.8008000000000001,
+        "confusion": {
+          "known": {
+            "known": 0,
+            "relative": 782,
+            "new": 518
+          },
+          "relative": {
+            "known": 0,
+            "relative": 207,
+            "new": 193
+          },
+          "new": {
+            "known": 0,
+            "relative": 0,
+            "new": 500
+          }
+        },
+        "balanced_accuracy_ci95": [
+          0.43,
+          0.6075
+        ],
+        "auroc_new_vs_rest_ci95": [
+          0.9685324411764706,
+          0.9997415882352941
+        ],
+        "n_boot": 2000,
+        "species_per_class": {
+          "known": 13,
+          "relative": 4,
+          "new": 5
+        },
+        "by_read_identity": [
+          {
+            "bin": "[0, 0.88)",
+            "n": 2,
+            "balanced_accuracy": 0.5,
+            "recall_known": 0.0,
+            "recall_relative": NaN,
+            "recall_new": 1.0
+          },
+          {
+            "bin": "[0.88, 0.92)",
+            "n": 1024,
+            "balanced_accuracy": 0.5037453183520599,
+            "recall_known": 0.0,
+            "recall_relative": 0.5112359550561798,
+            "recall_new": 1.0
+          },
+          {
+            "bin": "[0.92, 0.96)",
+            "n": 1174,
+            "balanced_accuracy": 0.5075075075075075,
+            "recall_known": 0.0,
+            "recall_relative": 0.5225225225225225,
+            "recall_new": 1.0
+          }
+        ],
+        "by_read_length": [
+          {
+            "bin": "[2000, 5000)",
+            "n": 41,
+            "balanced_accuracy": 0.4761904761904762,
+            "recall_known": 0.0,
+            "recall_relative": 0.42857142857142855,
+            "recall_new": 1.0
+          },
+          {
+            "bin": "[5000, 10000)",
+            "n": 1826,
+            "balanced_accuracy": 0.513677811550152,
+            "recall_known": 0.0,
+            "recall_relative": 0.541033434650456,
+            "recall_new": 1.0
+          },
+          {
+            "bin": "[10000, 1e+09)",
+            "n": 333,
+            "balanced_accuracy": 0.46875,
+            "recall_known": 0.0,
+            "recall_relative": 0.40625,
+            "recall_new": 1.0
+          }
+        ],
+        "thresholds": {
+          "t1": 0.07456403137391795,
+          "t2": 0.6529943351320816
+        }
+      },
+      "50": {
+        "n_specimens": 440,
+        "balanced_accuracy": 0.3833333333333333,
+        "recall_known": 0.0,
+        "n_known": 260,
+        "recall_relative": 0.15,
+        "n_relative": 80,
+        "recall_new": 1.0,
+        "n_new": 100,
+        "known_species_top1": 0.7730769230769231,
+        "relative_genus_top1": 1.0,
+        "new_family_top1": 0.4,
+        "auroc_new_vs_rest": 0.9993529411764706,
+        "auroc_known_vs_rest": 0.80991452991453,
+        "confusion": {
+          "known": {
+            "known": 0,
+            "relative": 75,
+            "new": 185
+          },
+          "relative": {
+            "known": 0,
+            "relative": 12,
+            "new": 68
+          },
+          "new": {
+            "known": 0,
+            "relative": 0,
+            "new": 100
+          }
+        },
+        "balanced_accuracy_ci95": [
+          0.3333333333333333,
+          0.48333333333333334
+        ],
+        "auroc_new_vs_rest_ci95": [
+          0.9972933823529413,
+          1.0
+        ],
+        "n_boot": 2000,
+        "species_per_class": {
+          "known": 13,
+          "relative": 4,
+          "new": 5
+        },
+        "by_read_identity": [
+          {
+            "bin": "[0.88, 0.92)",
+            "n": 208,
+            "balanced_accuracy": 0.37719298245614036,
+            "recall_known": 0.0,
+            "recall_relative": 0.13157894736842105,
+            "recall_new": 1.0
+          },
+          {
+            "bin": "[0.92, 0.96)",
+            "n": 232,
+            "balanced_accuracy": 0.3888888888888889,
+            "recall_known": 0.0,
+            "recall_relative": 0.16666666666666666,
+            "recall_new": 1.0
+          }
+        ],
+        "by_read_length": [
+          {
+            "bin": "[5000, 10000)",
+            "n": 433,
+            "balanced_accuracy": 0.3833333333333333,
+            "recall_known": 0.0,
+            "recall_relative": 0.15,
+            "recall_new": 1.0
+          },
+          {
+            "bin": "[10000, 1e+09)",
+            "n": 7,
+            "balanced_accuracy": 0.0,
+            "recall_known": 0.0,
+            "recall_relative": NaN,
+            "recall_new": NaN
+          }
+        ],
+        "thresholds": {
+          "t1": 0.15067616629222155,
+          "t2": 0.4933000968996955
+        }
+      }
+    }
+  }
+}

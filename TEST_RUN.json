@@ -1,0 +1,14 @@
+{
+  "first_run": "2026-11-19T02:14:50+00:00",
+  "methods": [
+    "kmer_raw",
+    "kmer_head",
+    "plantcad_raw",
+    "plantcad_head",
+    "plantcad_ft2_head",
+    "minimap2",
+    "minimap2_train"
+  ],
+  "lock_sha256": "e5652294b98b441a0f1d50aee9315d851df2fd99ca69a09847b6315b07d13a91",
+  "deviations": []
+}
