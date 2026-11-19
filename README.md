@@ -96,9 +96,25 @@ and runs a pre-flight check (`prp gpu-check`) before anything long.
 
 ## Results
 
-Pending the frozen test run. Validation results, the frozen targets (`PREREG.md`,
-`prereg.lock.json`) and the one-time test results (`results/`, `TEST_RUN.json`) will be committed in
-that order, so the history shows the targets came first.
+One preregistered test run on held-out species, no deviations. Targets, freeze and results were
+pushed in that order (19 Nov 2026, 02:12, 02:14 and 02:28 UTC). The full write-up is in
+[`results/SUMMARY.md`](results/SUMMARY.md).
+
+| Test split, 10 reads per specimen | Balanced accuracy [95% CI] |
+|---|---|
+| minimap2, full panel genomes | 0.956 [0.930, 0.975] |
+| k-mer composition + contrastive head | 0.575 [0.513, 0.637] |
+| PlantCaduceus, top layers adapted + head | 0.554 [0.454, 0.640] |
+| PlantCaduceus + head | 0.536 [0.437, 0.622] |
+| minimap2, training regions only | 0.506 [0.430, 0.608] |
+
+- **1 of 6 preregistered targets met** (detecting new species, AUROC 0.891). The language model did
+  not beat 5-mer composition, and both are far behind alignment to full reference genomes.
+- **The language model's strength is recognising species.** At 50 reads the nearest prototype is
+  the right species for 0.96 of known specimens, against 0.85 for k-mers and 0.77 for alignment to the
+  training regions only.
+- **Its weakness is the "relative" call.** Distance thresholds set on the validation species do not
+  transfer to new species.
 
 ## Limitations
 
