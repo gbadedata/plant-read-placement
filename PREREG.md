@@ -1,7 +1,7 @@
 # Preregistration: placing plant specimens from noisy Nanopore reads
 
-**Status: draft.** Every `TBD` below must be replaced with a number from the validation run before
-`prp freeze`; the freeze command refuses while any remain. After freezing, this file, the configs,
+**Status: targets set from the validation run on 19 Nov 2026; frozen with `prp freeze` (see
+`prereg.lock.json`).** The freeze command refuses while any target placeholder remains. After freezing, this file, the configs,
 the calibrated thresholds and the trained weights are hashed into `prereg.lock.json`, and the test
 split can be scored once. Any re-run is logged as a deviation in `TEST_RUN.json`.
 
@@ -64,19 +64,28 @@ genus, new needs the call "new".
   nearest-species accuracy for known specimens; nearest-genus accuracy for relatives; single-read
   accuracy by read-identity bin.
 
-## 6. Targets (set from validation before test; fill every TBD)
+## 6. Targets (set from validation before test)
 
-Guidance: set each target slightly below the validation value, because the test species are
-different species and some shrinkage is expected. Write the validation value next to each target.
+Rule, fixed before any test specimen was scored. Single scores (H1, H3, H4): the validation value minus
+0.05, because the test species are different species and the thresholds were tuned on the validation
+specimens. Differences that ask "does it add anything" (H2, H5): at least +0.02, the smallest gain that
+would be called an improvement; "slightly below the validation value" would put these near zero, so that
++0.001 would count. Neither reaches +0.02 on validation, so both are predicted not to be met.
+minimap2's lead (H6): the validation lead plus 0.05. Validation values are at 10 reads per specimen,
+with species-level bootstrap 95% intervals where the metric has one.
 
 | | hypothesis | validation value | target on test |
 |---|---|---|---|
-| H1 | `plantcad_head` balanced accuracy at n = 10 | TBD | >= TBD |
-| H2 | `plantcad_head` minus `kmer_head` balanced accuracy at n = 10 (does the language model add anything over composition?) | TBD | >= TBD |
-| H3 | `plantcad_head` AUROC new vs rest at n = 10 | TBD | >= TBD |
-| H4 | `plantcad_head` relative-genus rate at n = 10 | TBD | >= TBD |
-| H5 | `plantcad_ft2_head` minus `plantcad_head` balanced accuracy at n = 10 (does adapting the backbone help?) | TBD | >= TBD |
-| H6 | `minimap2` minus `plantcad_head` balanced accuracy at n = 10 (prediction stated in advance; minimap2 is expected to lead on known species because it indexes their full genomes) | TBD | <= TBD |
+| H1 | `plantcad_head` balanced accuracy at n = 10 | 0.588 (0.506 to 0.665) | >= 0.538 |
+| H2 | `plantcad_head` minus `kmer_head` balanced accuracy at n = 10 (does the language model add anything over composition?) | +0.004 (`kmer_head` 0.584, 0.525 to 0.637) | >= +0.020 (predicted not met) |
+| H3 | `plantcad_head` AUROC new vs rest at n = 10 | 0.921 (`kmer_head` 0.940) | >= 0.871 |
+| H4 | `plantcad_head` relative-genus rate at n = 10: `relative_genus_top1`, the share of relative specimens whose nearest prototype is in the right genus, ignoring the thresholds | 0.973 | >= 0.923 |
+| H5 | `plantcad_ft2_head` minus `plantcad_head` balanced accuracy at n = 10 (does adapting the backbone help?) | +0.011 (`plantcad_ft2_head` 0.598, 0.547 to 0.645) | >= +0.020 (predicted not met) |
+| H6 | `minimap2` minus `plantcad_head` balanced accuracy at n = 10 (prediction stated in advance; minimap2 is expected to lead on known species because it indexes their full genomes) | +0.325 (`minimap2` 0.913, 0.779 to 0.987) | <= +0.375 |
+
+Evaluated once on test: `kmer_raw`, `kmer_head`, `plantcad_raw`, `plantcad_head`, `plantcad_ft2_head`,
+`minimap2`, and `minimap2_train` as a reference row with no hypothesis. `plantcad_ft_head` (fine-tune
+attempt 1) is a validation record only.
 
 A hypothesis is met if the test point estimate reaches its target. With 4 to 13 species per class
 the intervals will be wide; they are reported for every outcome and no claim is made that an interval
@@ -128,6 +137,19 @@ Changes made on validation before the lock, kept here so they are visible next t
   attempt 1's entry: the adapted encoder's outputs did change (mostly a constant offset, plus a per-read
   change about one sixth of the typical distance between two reads); the change did not help placement.
   The commitment stands: no attempt 3 before the test.
+- **Attempt 2 outcome against the prediction above (19 Nov 2026).** Half right. Attempt 2 started at the
+  collapsed level (each term 3.89 at step 250) but slowly moved below it (3.82 by step 3000, total 6.70
+  against 6.88 collapsed and 7.54 untrained), so it learned a little, which attempt 1 never did. 3 of
+  3,000 updates were skipped and the trainable weights moved 1.8%, which rules out skipped updates and
+  frozen weights as causes. Downstream it adds little: a head on its features scored 0.565 during
+  training against 0.569 for the frozen model, and +0.011 balanced accuracy on validation at n = 10.
+  The frozen embeddings were re-made in that Kaggle session and matched the first session's exactly
+  (maximum difference 0 on all splits).
+- **H4 wording clarified (19 Nov 2026, before freezing).** "Relative-genus rate" could mean the
+  end-to-end relative recall or the threshold-free nearest-genus accuracy. It is the latter,
+  `relative_genus_top1`, the name the training monitor and the secondary outcomes already use
+  ("nearest-genus accuracy for relatives"). End-to-end relative recall is reported for every method
+  anyway (validation, n = 10: `plantcad_head` 0.43, `kmer_head` 0.71).
 - **`minimap2_train` added (18 Nov 2026), after seeing the validation table.** `minimap2` indexes the full
   panel genomes, so a known species' validation and test reads align to the exact sequence they came
   from; H6 and section 8 already said this favours it. `minimap2_train` indexes only the training blocks,

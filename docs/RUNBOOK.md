@@ -62,7 +62,7 @@ Run long steps inside `tmux` (`tmux new -s prp`; reattach with `tmux attach -t p
 | 13b | optional, exploratory: `prp explore --methods kmer_head plantcad_head plantcad_ft2_head minimap2 minimap2_train` (where each class goes and why) | laptop | seconds |
 | 14 | fill every `TBD` in `PREREG.md` from `work/results/val/RESULTS.md`; commit and push | laptop | |
 | 15 | `prp freeze`; commit `prereg.lock.json`; push | laptop | seconds |
-| 16 | `prp evaluate --split test --methods <same list>` | laptop | 10 min |
+| 16 | `prp evaluate --split test --methods kmer_raw kmer_head plantcad_raw plantcad_head plantcad_ft2_head minimap2 minimap2_train` (the list in PREREG.md section 6; it checks every input exists before registering the run) | laptop | 10 min |
 | 17 | copy `work/results/test/` to `results/`; commit `TEST_RUN.json` and results; push | laptop | |
 
 Pushing after steps 14 and 15 leaves a public, timestamped record that the targets came before the

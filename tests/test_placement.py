@@ -137,3 +137,23 @@ def test_minimap_method_names_map_to_references():
     assert method_reference("minimap2_train") == "train"
     assert method_reference("minimap2_other") is None
     assert method_reference("kmer_head") is None
+
+
+def test_preflight_names_every_missing_input(tmp_path):
+    import numpy as np
+
+    from prp.cli import preflight
+    from prp.paths import Layout
+
+    layout = Layout(tmp_path / "work", tmp_path)
+    layout.read_table("test").write_text("read_id\n")
+    np.save(layout.features("kmer", "train"), np.zeros((2, 3)))
+    np.save(layout.features("kmer", "test"), np.zeros((2, 3)))
+    layout.calibration("kmer_head").write_text("{}")
+    problems = preflight(layout, ["kmer_head", "plantcad_head", "minimap2"], "test")
+    text = "\n".join(problems)
+    assert "kmer_head: head" in text
+    assert "plantcad_head: no calibration" in text and "plantcad_head: features" in text
+    assert "minimap2: no calibration" in text
+    (layout.model_dir("kmer_head") / "head.pt").write_bytes(b"x")
+    assert preflight(layout, ["kmer_head"], "test") == []

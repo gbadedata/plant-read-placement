@@ -44,6 +44,31 @@ def method_transform(layout, method: str):
     raise ValueError(f"method must be minimap2, minimap2_train, <features>_raw or <features>_head (got {method})")
 
 
+def preflight(layout, methods: list[str], split: str) -> list[str]:
+    """Inputs each method needs to be scored on `split`, checked before a test run is registered,
+    so a missing file cannot turn the one-time test run into a logged re-run."""
+    from .minimap import method_reference
+
+    problems = []
+    if not layout.read_table(split).exists():
+        problems.append(f"reads table {layout.read_table(split)} is missing")
+    for m in methods:
+        if not layout.calibration(m).exists():
+            problems.append(f"{m}: no calibration (run `prp dev` with it first)")
+        if method_reference(m) is not None:
+            continue  # minimap2 maps on the fly if its hits are not cached
+        if not (m.endswith("_raw") or m.endswith("_head")):
+            problems.append(f"{m}: unknown method name")
+            continue
+        feat = m.rsplit("_", 1)[0]
+        for sp in ("train", split):
+            if not layout.features(feat, sp).exists():
+                problems.append(f"{m}: features {layout.features(feat, sp)} are missing")
+        if m.endswith("_head") and not (layout.model_dir(m) / "head.pt").exists():
+            problems.append(f"{m}: head {layout.model_dir(m) / 'head.pt'} is missing")
+    return problems
+
+
 def compute_scores(panel, exp, layout, method: str, split: str) -> dict[int, pd.DataFrame]:
     from .embed import load_features
     from .minimap import map_split, method_reference, score_minimap
@@ -286,6 +311,9 @@ def cmd_evaluate(args):
             rel = str(cal.relative_to(exp.root.resolve())) if cal.is_relative_to(exp.root.resolve()) else str(cal)
             if rel not in frozen:
                 sys.exit(f"{m}: calibration {rel} is not part of the frozen preregistration")
+        problems = preflight(layout, args.methods, "test")
+        if problems:
+            sys.exit("not starting the test run; fix these first:\n  " + "\n  ".join(problems))
         register_test_run(layout, args.methods, args.rerun_reason)
         for m in args.methods:
             compute_scores(panel, exp, layout, m, "test")
