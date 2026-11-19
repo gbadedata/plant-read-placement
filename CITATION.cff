@@ -4,7 +4,20 @@ title: "plant-read-placement: placing plant specimens from noisy Nanopore reads 
 authors:
   - family-names: Odimayo
     given-names: Oluwagbade
-version: 0.1.0
-date-released: 2026-11-14
+version: 1.0.0
+date-released: 2026-11-19
 license: MIT
 repository-code: "https://github.com/gbadedata/plant-read-placement"
+abstract: >-
+  A preregistered benchmark of whether a plant DNA language model (PlantCaduceus) can place a plant
+  specimen as a known species, an unseen relative or likely new from a few noisy Oxford Nanopore reads,
+  against k-mer composition and minimap2, on real genomes and held-out species. Targets were frozen by
+  hash before a single test run.
+keywords:
+  - DNA language model
+  - PlantCaduceus
+  - Oxford Nanopore
+  - species identification
+  - contrastive learning
+  - preregistration
+  - benchmark
