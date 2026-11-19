@@ -14,7 +14,10 @@ straight into work/ would overwrite attempt 1's record. This script:
 3. leaves the zip's re-made frozen embeddings and frozen head alone (work/ already has attempt 1's),
    but compares the re-made frozen embeddings with the ones in work/ as a reproducibility check.
 
-Usage:  python scripts/import_retry.py /path/to/gpu_outputs.zip [--work work]
+Accepts either the notebook's own gpu_outputs.zip (files at the top) or Kaggle's "download all" archive
+of the Output tab (files under prp/work/ or similar): the prefix is found from the fine-tune log's path.
+
+Usage:  python scripts/import_retry.py /path/to/archive.zip [--work work]
 """
 
 from __future__ import annotations
@@ -38,11 +41,20 @@ RENAMES = {
 EXPECTED = {"windows_per_read": 3, "lr_backbone": 1.0e-4}
 
 
-def check_attempt_2(zf: zipfile.ZipFile) -> dict:
-    name = "models/plantcad_adapted/finetune_log.json"
-    if name not in zf.namelist():
-        sys.exit(f"{name} is not in the zip: is this the Kaggle output?")
-    log = json.loads(zf.read(name))
+LOG = "models/plantcad_adapted/finetune_log.json"
+
+
+def find_prefix(zf: zipfile.ZipFile) -> str:
+    hits = [m for m in zf.namelist() if m == LOG or m.endswith("/" + LOG)]
+    if not hits:
+        sys.exit(f"no {LOG} in the zip: is this the Kaggle output? (first entries: {zf.namelist()[:5]})")
+    if len(hits) > 1:
+        sys.exit(f"more than one fine-tune log in the zip: {hits}")
+    return hits[0][: -len(LOG)]
+
+
+def check_attempt_2(zf: zipfile.ZipFile, prefix: str) -> dict:
+    log = json.loads(zf.read(prefix + LOG))
     cfg = log["config"]
     for key, want in EXPECTED.items():
         if float(cfg.get(key, -1)) != float(want):
@@ -77,14 +89,14 @@ def rewrite_metadata(dest: Path, old: str) -> None:
         torch.save(state, head)
 
 
-def compare_frozen(zf: zipfile.ZipFile, work: Path) -> list[str]:
+def compare_frozen(zf: zipfile.ZipFile, prefix: str, work: Path) -> list[str]:
     lines = []
     for split in ("train", "val", "test"):
         name = f"features/plantcad/{split}.npy"
         mine = work / name
-        if name not in zf.namelist() or not mine.exists():
+        if prefix + name not in zf.namelist() or not mine.exists():
             continue
-        a = np.load(io.BytesIO(zf.read(name)))
+        a = np.load(io.BytesIO(zf.read(prefix + name)), allow_pickle=False)
         b = np.load(mine)
         if a.shape != b.shape:
             lines.append(f"{split}: shapes differ {a.shape} vs {b.shape}")
@@ -100,14 +112,15 @@ def main(argv=None) -> None:
     ap.add_argument("--work", type=Path, default=Path("work"))
     args = ap.parse_args(argv)
     with zipfile.ZipFile(args.zip) as zf:
-        log = check_attempt_2(zf)
+        prefix = find_prefix(zf)
+        log = check_attempt_2(zf, prefix)
         for new in RENAMES.values():
             if (args.work / new).exists():
                 sys.exit(f"{args.work / new} already exists; not overwriting")
         with tempfile.TemporaryDirectory() as tmp:
-            members = [m for m in zf.namelist() if any(m.startswith(old + "/") for old in RENAMES)]
+            members = [m for m in zf.namelist() if any(m.startswith(prefix + old + "/") for old in RENAMES)]
             for m in members:  # extract member by member: no path outside tmp is ever written
-                target = Path(tmp) / m
+                target = Path(tmp) / m[len(prefix):]
                 if not target.resolve().is_relative_to(Path(tmp).resolve()):
                     sys.exit(f"refusing suspicious path in zip: {m}")
                 if not m.endswith("/"):
@@ -121,7 +134,7 @@ def main(argv=None) -> None:
                 shutil.copytree(src, dest)
                 rewrite_metadata(dest, Path(old).name)
                 print(f"[import] {old} -> {dest}")
-        check = compare_frozen(zf, args.work)
+        check = compare_frozen(zf, prefix, args.work)
     best = log.get("best", {})
     print(f"[import] attempt 2: best step {best.get('step')} score {best.get('score', float('nan')):.3f}, "
           f"{log.get('skipped_steps')} updates skipped, batch {log.get('effective_batch')}")

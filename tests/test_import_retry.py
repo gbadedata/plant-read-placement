@@ -13,7 +13,7 @@ import torch
 SCRIPT = Path(__file__).resolve().parents[1] / "scripts" / "import_retry.py"
 
 
-def _zip(path: Path, windows_per_read: int, lr: float, frozen: dict[str, np.ndarray]) -> Path:
+def _zip(path: Path, windows_per_read: int, lr: float, frozen: dict[str, np.ndarray], prefix: str = "") -> Path:
     import io
 
     def npy(a):
@@ -24,17 +24,17 @@ def _zip(path: Path, windows_per_read: int, lr: float, frozen: dict[str, np.ndar
     head = io.BytesIO()
     torch.save({"config": {}, "state_dict": {}, "features": "plantcad_ft", "step": 5}, head)
     with zipfile.ZipFile(path, "w") as zf:
-        zf.writestr("models/plantcad_adapted/finetune_log.json", json.dumps(
+        zf.writestr(prefix + "models/plantcad_adapted/finetune_log.json", json.dumps(
             {"out": "plantcad_adapted", "config": {"windows_per_read": windows_per_read, "lr_backbone": lr},
              "best": {"step": 500, "score": 0.3}, "skipped_steps": 3, "effective_batch": {}}))
-        zf.writestr("models/plantcad_adapted/encoder.pt", b"x")
-        zf.writestr("models/plantcad_ft_head/head.pt", head.getvalue())
-        zf.writestr("models/plantcad_ft_head/train_log.json", json.dumps({"features": "plantcad_ft", "head": "plantcad_ft_head"}))
-        zf.writestr("models/plantcad_head/head.pt", b"retrained frozen head: must not be imported")
+        zf.writestr(prefix + "models/plantcad_adapted/encoder.pt", b"x")
+        zf.writestr(prefix + "models/plantcad_ft_head/head.pt", head.getvalue())
+        zf.writestr(prefix + "models/plantcad_ft_head/train_log.json", json.dumps({"features": "plantcad_ft", "head": "plantcad_ft_head"}))
+        zf.writestr(prefix + "models/plantcad_head/head.pt", b"retrained frozen head: must not be imported")
         for split, a in frozen.items():
-            zf.writestr(f"features/plantcad/{split}.npy", npy(a))
-            zf.writestr(f"features/plantcad_ft/{split}.npy", npy(a + 1))
-            zf.writestr(f"features/plantcad_ft/{split}.json", json.dumps(
+            zf.writestr(prefix + f"features/plantcad/{split}.npy", npy(a))
+            zf.writestr(prefix + f"features/plantcad_ft/{split}.npy", npy(a + 1))
+            zf.writestr(prefix + f"features/plantcad_ft/{split}.json", json.dumps(
                 {"name": "plantcad_ft", "checkpoint": "work/models/plantcad_adapted/encoder.pt"}))
     return path
 
@@ -72,3 +72,12 @@ def test_import_renames_and_protects_attempt_1(tmp_path, capsys):
 def test_import_refuses_attempt_1_zip(tmp_path):
     with pytest.raises(SystemExit, match="not attempt 2"):
         _run(str(_zip(tmp_path / "r1.zip", 1, 2e-5, {})), "--work", str(tmp_path / "work"))
+
+
+def test_import_accepts_kaggle_download_all_layout(tmp_path):
+    work = tmp_path / "work"
+    frozen = {"val": np.ones((3, 4), dtype=np.float32)}
+    _run(str(_zip(tmp_path / "all.zip", 3, 1e-4, frozen, prefix="prp/work/")), "--work", str(work))
+    assert (work / "features" / "plantcad_ft2" / "val.npy").exists()
+    assert (work / "models" / "plantcad_adapted_r2" / "finetune_log.json").exists()
+    assert (work / "models" / "plantcad_ft2_head" / "head.pt").exists()
